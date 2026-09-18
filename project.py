@@ -89,8 +89,6 @@ st.markdown(
 
 st.title("🎓 My Streamlit App")
 
-st.write("Your custom live video background is working!")
-
 # ==========================================================
 # PAGE CONFIGURATION
 # ==========================================================
@@ -287,6 +285,192 @@ footer {
 
 header {
     background: transparent !important;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+
+# ==========================================================
+# RESPONSIVE PHONE + DESKTOP UI
+# ==========================================================
+
+st.markdown("""
+<style>
+
+/* Give desktop monitors more breathing room while keeping content readable. */
+.block-container {
+    width: min(94vw, 1180px) !important;
+    max-width: 1180px !important;
+    margin: 0 auto !important;
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+}
+
+/* Prevent accidental sideways scrolling. */
+html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+    overflow-x: hidden !important;
+}
+
+/* Make the app feel more spacious and polished on large screens. */
+@media (min-width: 1100px) {
+    .block-container {
+        padding-top: 52px !important;
+        padding-bottom: 80px !important;
+    }
+
+    h1 {
+        font-size: 3rem !important;
+    }
+
+    h2 {
+        font-size: 2rem !important;
+    }
+
+    h3 {
+        font-size: 1.35rem !important;
+    }
+}
+
+/* Tablet sizing. */
+@media (min-width: 769px) and (max-width: 1099px) {
+    .block-container {
+        width: min(94vw, 900px) !important;
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+    }
+}
+
+/* Phone-first sizing. */
+@media (max-width: 768px) {
+    .block-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 22px 12px 48px 12px !important;
+    }
+
+    h1 {
+        font-size: 2rem !important;
+        line-height: 1.12 !important;
+        margin-bottom: 0.45rem !important;
+    }
+
+    h2 {
+        font-size: 1.45rem !important;
+        line-height: 1.2 !important;
+    }
+
+    h3 {
+        font-size: 1.12rem !important;
+    }
+
+    p, label, .stMarkdown, .stText, .stCaption {
+        font-size: 0.96rem !important;
+    }
+
+    /* Smaller glass cards on narrow screens. */
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        border-radius: 18px !important;
+        padding: 6px !important;
+        margin-bottom: 10px !important;
+    }
+
+    /* Keep calculator/scientific buttons in compact grids. */
+    .stButton > button {
+        min-height: 44px !important;
+        padding: 8px 4px !important;
+        border-radius: 12px !important;
+        font-size: 0.92rem !important;
+    }
+
+    /* Make inputs comfortable for touch. */
+    .stTextInput input,
+    .stNumberInput input {
+        min-height: 44px !important;
+        font-size: 16px !important;
+        border-radius: 12px !important;
+    }
+
+    /* Compact navigation that remains easy to tap. */
+    .navigation-bar {
+        top: 6px !important;
+        padding: 7px !important;
+        margin-bottom: 20px !important;
+        border-radius: 15px !important;
+    }
+
+    .navigation-title {
+        font-size: 11px !important;
+        margin-bottom: 6px !important;
+    }
+
+    .navigation-link {
+        padding: 9px 2px !important;
+        min-height: 38px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 11px !important;
+        border-radius: 10px !important;
+        line-height: 1.1 !important;
+    }
+
+    /* Make the grading table scroll horizontally instead of breaking the page. */
+    div[data-testid="stTable"] {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    div[data-testid="stTable"] table {
+        min-width: 560px !important;
+        font-size: 15px !important;
+    }
+
+    div[data-testid="stTable"] th {
+        font-size: 15px !important;
+        padding: 11px 10px !important;
+    }
+
+    div[data-testid="stTable"] td {
+        font-size: 14px !important;
+        padding: 10px !important;
+    }
+
+    /* Reduce the huge section spacers on phones so scrolling feels natural. */
+    .mobile-section-spacer {
+        height: 18vh !important;
+    }
+
+    /* Keep dialogs inside the phone viewport. */
+    [data-testid="stDialog"] > div {
+        width: calc(100vw - 24px) !important;
+        max-width: calc(100vw - 24px) !important;
+        border-radius: 22px !important;
+    }
+}
+
+/* Very small phones. */
+@media (max-width: 420px) {
+    .block-container {
+        padding-left: 9px !important;
+        padding-right: 9px !important;
+    }
+
+    .navigation-link {
+        font-size: 10px !important;
+        padding-left: 1px !important;
+        padding-right: 1px !important;
+    }
+
+    .stButton > button {
+        font-size: 0.84rem !important;
+        min-height: 42px !important;
+    }
+
+    .stTextInput input,
+    .stNumberInput input {
+        font-size: 16px !important;
+    }
 }
 
 </style>
