@@ -89,6 +89,8 @@ st.markdown(
 
 st.title("🎓 My Streamlit App")
 
+st.write("Your custom live video background is working!")
+
 # ==========================================================
 # PAGE CONFIGURATION
 # ==========================================================
@@ -375,7 +377,23 @@ html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
         margin-bottom: 10px !important;
     }
 
-    /* Keep calculator/scientific buttons in compact grids. */
+    /* Keep calculator/scientific buttons in a 4-column row on phones. */
+    /* Streamlit can wrap column blocks on narrow screens; prevent that for rows containing buttons. */
+    .stHorizontalBlock:has(.stButton) {
+        flex-wrap: nowrap !important;
+        gap: 6px !important;
+    }
+
+    .stHorizontalBlock:has(.stButton) > div {
+        min-width: 0 !important;
+        flex: 1 1 0 !important;
+    }
+
+    .stHorizontalBlock:has(.stButton) .stButton,
+    .stHorizontalBlock:has(.stButton) .stButton > button {
+        width: 100% !important;
+    }
+
     .stButton > button {
         min-height: 44px !important;
         padding: 8px 4px !important;
