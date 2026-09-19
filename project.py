@@ -81,12 +81,13 @@ st.markdown(
 )
 
 # ==========================================================
-# ESSENTIALS DESIGN SYSTEM & SMOOTH SCROLL SCRIPT
+# ESSENTIALS DESIGN SYSTEM & GUARANTEED SMOOTH SCROLL SCRIPT
 # ==========================================================
 
 st.markdown("""
 <style>
-[data-testid="stAppViewContainer"] {
+/* Enforce global smooth scrolling across both HTML root and Streamlit's container */
+html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     scroll-behavior: smooth !important;
 }
 
@@ -100,6 +101,7 @@ st.markdown("""
 
 .section-anchor {
     scroll-margin-top: 110px;
+    display: block;
 }
 
 h1, h2, h3, h4 {
@@ -239,22 +241,27 @@ div[data-testid="stTable"] th {
 }
 </style>
 
+<!-- Event Delegation Script for Dynamic Streamlit Rerenders -->
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const links = document.querySelectorAll('.navigation-link');
-    links.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const targetId = link.getAttribute('href').replace('#', '');
-            const targetElem = document.getElementById(targetId);
-            const container = document.querySelector('[data-testid="stAppViewContainer"]');
-            if (targetElem && container) {
-                const topOffset = targetElem.getBoundingClientRect().top + container.scrollTop - 110;
-                container.scrollTo({ top: topOffset, behavior: 'smooth' });
-            }
-        });
-    });
-});
+(function() {
+    function smoothScrollToAnchor(e) {
+        const link = e.target.closest('.navigation-link');
+        if (!link) return;
+        
+        e.preventDefault();
+        const targetId = link.getAttribute('href').replace('#', '');
+        const targetElem = document.getElementById(targetId);
+        const container = document.querySelector('[data-testid="stAppViewContainer"]') || window;
+        
+        if (targetElem) {
+            targetElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    // Attach to document body to survive Streamlit re-renders
+    document.removeEventListener('click', smoothScrollToAnchor);
+    document.addEventListener('click', smoothScrollToAnchor);
+})();
 </script>
 """, unsafe_allow_html=True)
 
