@@ -502,10 +502,14 @@ if st.button(
 # Extra vertical space so this section occupies its own screen when scrolling.
 st.markdown('<div style="height: 8vh;"></div>', unsafe_allow_html=True)
 
+# ==========================================================
 # SCIENTIFIC CALCULATOR
 # ==========================================================
 
-st.markdown('<div id="calculator" class="section-anchor"></div>', unsafe_allow_html=True)
+st.markdown(
+    '<div id="calculator" class="section-anchor"></div>',
+    unsafe_allow_html=True
+)
 
 st.markdown("---")
 
@@ -515,21 +519,35 @@ st.write(
     "A simple scientific calculator with powerful functions."
 )
 
+
+# ==========================================================
+# CALCULATOR STATE
+# ==========================================================
+
 if "calc_display" not in st.session_state:
     st.session_state.calc_display = ""
 
 if "calc_result" not in st.session_state:
     st.session_state.calc_result = ""
 
+if "calc_show_result" not in st.session_state:
+    st.session_state.calc_show_result = False
+
+
+# ==========================================================
+# CALCULATOR FUNCTIONS
+# ==========================================================
 
 def add_to_calculator(value):
-    st.session_state.calc_display += value
+    st.session_state.calc_display += str(value)
     st.session_state.calc_result = ""
+    st.session_state.calc_show_result = False
 
 
 def clear_calculator():
     st.session_state.calc_display = ""
     st.session_state.calc_result = ""
+    st.session_state.calc_show_result = False
 
 
 def backspace_calculator():
@@ -537,45 +555,101 @@ def backspace_calculator():
         st.session_state.calc_display[:-1]
     )
     st.session_state.calc_result = ""
+    st.session_state.calc_show_result = False
 
 
 def calculate_result():
 
-    expression = st.session_state.calc_display
+    expression = st.session_state.calc_display.strip()
 
     if not expression:
         return
 
     try:
 
+        # --------------------------------------------------
+        # Convert calculator symbols to Python-compatible
+        # expressions
+        # --------------------------------------------------
+
+        expression = expression.replace("×", "*")
+        expression = expression.replace("÷", "/")
+        expression = expression.replace("^", "**")
+
+        # --------------------------------------------------
+        # Scientific functions
+        # Trigonometry uses DEGREES
+        # --------------------------------------------------
+
+        def sin_deg(x):
+            return math.sin(math.radians(x))
+
+        def cos_deg(x):
+            return math.cos(math.radians(x))
+
+        def tan_deg(x):
+            return math.tan(math.radians(x))
+
         allowed = {
             "sqrt": math.sqrt,
-            "sin": math.sin,
-            "cos": math.cos,
-            "tan": math.tan,
+            "sin": sin_deg,
+            "cos": cos_deg,
+            "tan": tan_deg,
             "log": math.log10,
             "ln": math.log,
             "pi": math.pi,
             "e": math.e
         }
 
+        # --------------------------------------------------
+        # Safe evaluation
+        # --------------------------------------------------
+
         result = eval(
             expression,
-            {"__builtins__": {}},
+            {"__builtins__": None},
             allowed
         )
 
-        if isinstance(result, float):
+        # --------------------------------------------------
+        # Format result
+        # --------------------------------------------------
 
-            if result.is_integer():
-                result = str(int(result))
+        if isinstance(result, complex):
+
+            st.session_state.calc_result = (
+                "Error: Complex numbers are not supported"
+            )
+
+        elif isinstance(result, (int, float)):
+
+            if not math.isfinite(result):
+
+                st.session_state.calc_result = (
+                    "Error: Result is undefined"
+                )
+
+            elif result == 0:
+
+                st.session_state.calc_result = "0"
+
+            elif float(result).is_integer():
+
+                st.session_state.calc_result = str(
+                    int(result)
+                )
+
             else:
-                result = str(round(result, 10))
+
+                st.session_state.calc_result = str(
+                    round(float(result), 10)
+                )
 
         else:
-            result = str(result)
 
-        st.session_state.calc_result = result
+            st.session_state.calc_result = str(result)
+
+        st.session_state.calc_show_result = True
 
     except ZeroDivisionError:
 
@@ -583,19 +657,43 @@ def calculate_result():
             "Error: Cannot divide by zero"
         )
 
+        st.session_state.calc_show_result = True
+
+    except ValueError:
+
+        st.session_state.calc_result = (
+            "Error: Invalid mathematical operation"
+        )
+
+        st.session_state.calc_show_result = True
+
+    except OverflowError:
+
+        st.session_state.calc_result = (
+            "Error: Number is too large"
+        )
+
+        st.session_state.calc_show_result = True
+
     except Exception:
 
         st.session_state.calc_result = (
             "Error: Invalid calculation"
         )
 
+        st.session_state.calc_show_result = True
+
+
+# ==========================================================
+# RESULT DIALOG
+# ==========================================================
 
 @st.dialog("🧮 Calculation Result")
 def show_calculator_result():
 
     st.subheader("Your calculation")
 
-    st.write("Expression")
+    st.caption("Expression")
 
     st.code(
         st.session_state.calc_display,
@@ -610,14 +708,17 @@ def show_calculator_result():
         f"""
         <div style="
             text-align:center;
-            padding:20px;
-            font-size:42px;
-            font-weight:700;
+            padding:22px 14px;
+            font-size:clamp(30px, 8vw, 46px);
+            font-weight:750;
             color:white;
-            background:rgba(45,45,48,0.8);
+            background:rgba(255,255,255,0.055);
+            border:1px solid rgba(255,255,255,0.09);
             border-radius:20px;
-            margin:10px 0 25px 0;
-            animation:resultPop 0.5s ease-out;
+            margin:12px 0 24px 0;
+            animation:resultPop .35s ease-out;
+            overflow-wrap:anywhere;
+            word-break:break-word;
         ">
             {st.session_state.calc_result}
         </div>
@@ -625,53 +726,92 @@ def show_calculator_result():
         unsafe_allow_html=True
     )
 
-    if st.button("✓ Done", use_container_width=True):
+    col1, col2 = st.columns(2)
 
-        st.session_state.calc_result = ""
+    with col1:
 
-        st.rerun()
+        if st.button(
+            "↺ Continue",
+            use_container_width=True
+        ):
 
+            st.session_state.calc_show_result = False
+            st.rerun()
+
+    with col2:
+
+        if st.button(
+            "✓ Done",
+            use_container_width=True
+        ):
+
+            st.session_state.calc_display = ""
+            st.session_state.calc_result = ""
+            st.session_state.calc_show_result = False
+            st.rerun()
+
+
+# ==========================================================
+# DISPLAY
+# ==========================================================
+
+st.markdown(
+    """
+    <div class="calculator-display">
+    """,
+    unsafe_allow_html=True
+)
 
 st.text_input(
     "Calculator Display",
     value=st.session_state.calc_display,
     disabled=True,
-    label_visibility="collapsed"
+    label_visibility="collapsed",
+    key="calculator_display_box"
 )
 
+st.markdown("</div>", unsafe_allow_html=True)
 
-# Calculator buttons
+
+# ==========================================================
+# BASIC CALCULATOR BUTTONS
+# ==========================================================
 
 calculator_rows = [
+
     [
-        ("7", "seven", "7"),
-        ("8", "eight", "8"),
-        ("9", "nine", "9"),
-        ("÷", "divide", "/")
+        ("7", "calc_7", "7"),
+        ("8", "calc_8", "8"),
+        ("9", "calc_9", "9"),
+        ("÷", "calc_divide", "/")
     ],
+
     [
-        ("4", "four", "4"),
-        ("5", "five", "5"),
-        ("6", "six", "6"),
-        ("×", "multiply", "*")
+        ("4", "calc_4", "4"),
+        ("5", "calc_5", "5"),
+        ("6", "calc_6", "6"),
+        ("×", "calc_multiply", "*")
     ],
+
     [
-        ("1", "one", "1"),
-        ("2", "two", "2"),
-        ("3", "three", "3"),
-        ("-", "minus", "-")
+        ("1", "calc_1", "1"),
+        ("2", "calc_2", "2"),
+        ("3", "calc_3", "3"),
+        ("−", "calc_minus", "-")
     ],
+
     [
-        ("0", "zero", "0"),
-        (".", "decimal", "."),
-        ("(", "left_parenthesis", "("),
-        ("+", "plus", "+")
+        ("0", "calc_0", "0"),
+        (".", "calc_decimal", "."),
+        ("(", "calc_left", "("),
+        ("+", "calc_plus", "+")
     ],
+
     [
-        (")", "right_parenthesis", ")"),
-        ("⌫", "backspace", None),
-        ("C", "clear", None),
-        ("=", "equals", None)
+        (")", "calc_right", ")"),
+        ("⌫", "calc_backspace", None),
+        ("C", "calc_clear", None),
+        ("=", "calc_equals", None)
     ]
 ]
 
@@ -686,7 +826,7 @@ for row in calculator_rows:
 
         with column:
 
-            if key == "backspace":
+            if key == "calc_backspace":
 
                 st.button(
                     label,
@@ -695,7 +835,7 @@ for row in calculator_rows:
                     on_click=backspace_calculator
                 )
 
-            elif key == "clear":
+            elif key == "calc_clear":
 
                 st.button(
                     label,
@@ -704,13 +844,16 @@ for row in calculator_rows:
                     on_click=clear_calculator
                 )
 
-            elif key == "equals":
+            elif key == "calc_equals":
 
                 st.button(
                     label,
                     key=key,
                     use_container_width=True,
-                    on_click=calculate_result
+                    on_click=calculate_result,
+                    disabled=not bool(
+                        st.session_state.calc_display.strip()
+                    )
                 )
 
             else:
@@ -724,25 +867,35 @@ for row in calculator_rows:
                 )
 
 
-# Scientific functions
+# ==========================================================
+# SCIENTIFIC FUNCTIONS
+# ==========================================================
 
 st.markdown("---")
 
 st.subheader("🔬 Scientific Functions")
 
+st.caption(
+    "sin, cos and tan use degrees."
+)
+
+
 scientific_rows = [
+
     [
-        ("√", "sqrt", "sqrt("),
-        ("sin", "sin", "sin("),
-        ("cos", "cos", "cos("),
-        ("tan", "tan", "tan(")
+        ("√", "calc_sqrt", "sqrt("),
+        ("sin", "calc_sin", "sin("),
+        ("cos", "calc_cos", "cos("),
+        ("tan", "calc_tan", "tan(")
     ],
+
     [
-        ("log", "log", "log("),
-        ("ln", "ln", "ln("),
-        ("π", "pi", "pi"),
-        ("e", "e", "e")
+        ("log", "calc_log", "log("),
+        ("ln", "calc_ln", "ln("),
+        ("π", "calc_pi", "pi"),
+        ("e", "calc_e", "e")
     ]
+
 ]
 
 
@@ -765,9 +918,16 @@ for row in scientific_rows:
             )
 
 
-if st.session_state.calc_result:
-    show_calculator_result()
+# ==========================================================
+# SHOW RESULT
+# ==========================================================
 
+if (
+    st.session_state.calc_show_result
+    and st.session_state.calc_result
+):
+
+    show_calculator_result()
 
 # ==========================================================
 
