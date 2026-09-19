@@ -647,7 +647,7 @@ components.html(
     const OFFSET = 100;
     const DURATION = 620;
 
-    const reduced = () => win.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reduced = () => !win.__smoothNavForce && win.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const easeInOutCubic = (t) =>
         t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
@@ -777,22 +777,42 @@ components.html(
 
         if (!link) return;
 
+        win.__smoothNavDebug.clicks += 1;
+        win.__smoothNavDebug.lastLink = link.getAttribute('data-smooth');
+        win.__smoothNavDebug.lastClickAt = new Date().toLocaleTimeString();
+
         const target = doc.getElementById(link.getAttribute('data-smooth'));
-        if (!target) return;
+        if (!target) {
+            win.__smoothNavDebug.lastOutcome = 'target id not found';
+            return;
+        }
 
         event.preventDefault();
+        win.__smoothNavDebug.lastOutcome = 'scrolling…';
         scrollToTarget(target);
     }, true);
 
     /* Small readout for the troubleshooting expander, if it's open. */
+    win.__smoothNavDebug = win.__smoothNavDebug || { clicks: 0, lastLink: null, lastClickAt: null, lastOutcome: null };
+
     win.__smoothNavReport = function () {
         const target = doc.getElementById('calculator');
-        if (!target) return 'anchor not found';
-        const scroller = findScroller(target);
-        if (!scroller) return 'no scrollable container found';
-        return (scroller.tagName.toLowerCase()
-            + (scroller.getAttribute('data-testid') ? '[' + scroller.getAttribute('data-testid') + ']' : '')
-            + ' — scrollHeight ' + scroller.scrollHeight + ', clientHeight ' + scroller.clientHeight);
+        const scrollerLine = (function () {
+            if (!target) return 'anchor not found';
+            const scroller = findScroller(target);
+            if (!scroller) return 'no scrollable container found';
+            return (scroller.tagName.toLowerCase()
+                + (scroller.getAttribute('data-testid') ? '[' + scroller.getAttribute('data-testid') + ']' : '')
+                + ' — scrollHeight ' + scroller.scrollHeight + ', clientHeight ' + scroller.clientHeight);
+        })();
+
+        const debug = win.__smoothNavDebug;
+
+        return scrollerLine
+            + ' | reduce-motion: ' + reduced()
+            + (win.__smoothNavForce ? ' (overridden ON)' : '')
+            + ' | nav clicks seen: ' + debug.clicks
+            + (debug.lastLink ? ' | last: ' + debug.lastLink + ' at ' + debug.lastClickAt : '');
     };
 })();
 </script>
@@ -1440,31 +1460,41 @@ if st.session_state.quiz_finished:
 with st.expander("Navigation troubleshooting"):
     st.markdown(
         '<p class="lede" style="margin-bottom:12px">'
-        "This shows which element your browser is scrolling. If it says "
-        "no scrollable container found, send me that line.</p>",
+        "This shows which element the page is scrolling, whether your click "
+        "reached the script, and whether your system has reduce-motion turned "
+        "on — that setting forces an instant jump instead of an animation.</p>",
         unsafe_allow_html=True,
     )
 
+    force_animation = st.toggle(
+        "Animate even if my system prefers reduced motion",
+        value=False,
+        help="Turn this on if the report below says reduce-motion is true "
+        "but you'd still like the smooth scroll animation.",
+    )
+
     components.html(
-        """
+        f"""
 <div style="font:13px -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;
-            color:rgba(255,255,255,0.88);padding:2px 0;">
+            color:rgba(255,255,255,0.88);padding:2px 0;line-height:1.6;">
     <span id="report">checking…</span>
 </div>
 <script>
-(function () {
+(function () {{
+    window.parent.__smoothNavForce = {str(force_animation).lower()};
     const output = document.getElementById('report');
-    function update() {
-        try {
+    function update() {{
+        try {{
             output.textContent = window.parent.__smoothNavReport
                 ? window.parent.__smoothNavReport()
                 : 'navigation script did not load';
-        } catch (error) {
+        }} catch (error) {{
             output.textContent = 'blocked from reading the page: ' + error.message;
-        }
-    }
-    setTimeout(update, 300);
-})();
+        }}
+    }}
+    setInterval(update, 500);
+    update();
+}})();
 </script>
 """,
         height=40,
