@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # ==========================================================
-# BACKGROUND VIDEO INJECTOR
+# BACKGROUND VIDEO INJECTOR (CLEAN HTML)
 # ==========================================================
 
 video_path = os.path.join(
@@ -27,7 +27,7 @@ if os.path.exists(video_path):
     with open(video_path, "rb") as video_file:
         video_base64 = base64.b64encode(video_file.read()).decode()
 
-video_html = f"<video autoplay loop muted playsinline webkit-playsinline preload='auto'><source src='data:video/mp4;base64,{video_base64}' type='video/mp4'></video>" if video_base64 else ""
+video_html = f"<video autoplay loop muted playsinline preload='auto'><source src='data:video/mp4;base64,{video_base64}' type='video/mp4'></video>" if video_base64 else ""
 
 st.markdown(
     f"""<style>
@@ -263,7 +263,7 @@ header { background: transparent !important; }
 """, unsafe_allow_html=True)
 
 # ==========================================================
-# NAVIGATION BAR (WITH GUARANTEED SMOOTH SCROLL JAVASCRIPT)
+# NAVIGATION BAR (GUARANTEED SMOOTH SCROLL JAVASCRIPT)
 # ==========================================================
 
 st.markdown("""
@@ -272,8 +272,8 @@ st.markdown("""
     <div class="nav-grid">
         <a class="navigation-link" href="#profile" onclick="scrollToSection(event, 'profile')">👤 Profile</a>
         <a class="navigation-link" href="#calculator" onclick="scrollToSection(event, 'calculator')">🧮 Calculator</a>
-        <a class="navigation-link" href="#grading" onclick="scrollToSection(event, 'grading')">🎓 Grading</a>
-        <a class="navigation-link" href="#quiz-maker" onclick="scrollToSection(event, 'quiz-maker')">🧠 Quiz Master</a>
+        <a class="navigation-link" href="#grading" onclick="scrollToSection(event, 'grading')">🎓 Grades</a>
+        <a class="navigation-link" href="#quiz-maker" onclick="scrollToSection(event, 'quiz-maker')">🧠 Quiz</a>
     </div>
 </div>
 
@@ -380,7 +380,7 @@ if st.button("✨ Save Profile", use_container_width=True):
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
 # ==========================================================
-# 2. SCIENTIFIC CALCULATOR (SUPER COMPACT MOBILE LAYOUT)
+# 2. SCIENTIFIC CALCULATOR (COMPACT MOBILE GRID)
 # ==========================================================
 
 st.markdown('<div id="calculator" class="section-anchor"></div>', unsafe_allow_html=True)
@@ -465,7 +465,7 @@ st.text_input(
     label_visibility="collapsed"
 )
 
-# Unified 5-column layout: fits perfectly without vertical scrolling on mobile
+# Compact 5-column calculator grid
 all_calculator_rows = [
     [("C", "clear", None), ("⌫", "backspace", None), ("(", "l_paren", "("), (")", "r_paren", ")"), ("÷", "divide", "/")],
     [("7", "7", "7"), ("8", "8", "8"), ("9", "9", "9"), ("√", "sqrt", "sqrt("), ("×", "multiply", "*")],
