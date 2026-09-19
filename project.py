@@ -67,66 +67,7 @@ st.markdown(
         z-index: -9;
     }}
 
-    
-    /* Compact mobile calculator */
-    @media (max-width: 600px) {
-        .calculator-display {
-            margin-bottom: 0.35rem !important;
-        }
-
-        div[data-testid="stHorizontalBlock"]:has(.calculator-display) {
-            gap: 0.2rem !important;
-        }
-
-        .stButton > button {
-            min-height: 42px !important;
-            padding: 0.35rem 0.25rem !important;
-            font-size: 0.88rem !important;
-        }
-
-        input, textarea, select {
-            font-size: 0.9rem !important;
-        }
-
-        div[data-testid="stHorizontalBlock"] {
-            gap: 0.35rem !important;
-        }
-    }
-
-
-    /* Stronger backdrop blur for readability */
-    .glass-card,
-    .stExpander,
-    div[data-testid="stMetric"],
-    div[data-testid="stDataFrame"],
-    div[data-testid="stForm"],
-    div[data-testid="stPopover"],
-    div[data-testid="stDialog"] > div {
-        backdrop-filter: blur(18px) saturate(115%) !important;
-        -webkit-backdrop-filter: blur(18px) saturate(115%) !important;
-        background: rgba(10, 12, 16, 0.72) !important;
-        border-color: rgba(255, 255, 255, 0.10) !important;
-    }
-
-    /* Keep text crisp above the blurred background */
-    .main .block-container {
-        position: relative;
-        z-index: 1;
-    }
-
-    /* Subtle readability veil behind the main content */
-    .main .block-container::before {
-        content: "";
-        position: fixed;
-        inset: 0;
-        z-index: -1;
-        pointer-events: none;
-        background: rgba(0, 0, 0, 0.12);
-        backdrop-filter: blur(3px);
-        -webkit-backdrop-filter: blur(3px);
-    }
-
-</style>
+    </style>
 
     <div class="custom-background">
         <video autoplay muted loop playsinline>
@@ -143,289 +84,499 @@ st.markdown(
 )
 
 # ==========================================================
-# ESSENTIALS APP
+# YOUR STREAMLIT APP GOES BELOW THIS LINE
 # ==========================================================
 
+st.title("🎓 My Streamlit App")
+
+
+
 # ==========================================================
-# CLEAN DARK DESIGN SYSTEM
+# PAGE CONFIGURATION
+# ==========================================================
+
+st.set_page_config(
+    page_title="My Profile & Grade Calculator",
+    page_icon="🎓",
+    layout="centered"\
+)
+
+
+# ==========================================================
+# APPLE-STYLE UI
 # ==========================================================
 
 st.markdown("""
 <style>
-:root {
-    --bg: #07070a;
-    --surface: rgba(17, 17, 21, 0.82);
-    --surface-strong: rgba(22, 22, 27, 0.94);
-    --border: rgba(255,255,255,.09);
-    --border-hover: rgba(255,255,255,.18);
-    --text: #f5f5f7;
-    --muted: #9a9aa3;
-    --accent: #d4d4d8;
-    --shadow: 0 18px 55px rgba(0,0,0,.34);
-}
 
-/* Base */
 .stApp {
-    color: var(--text);
-    background: transparent !important;
+    color: #f5f5f7;
 }
-html {
-    scroll-behavior: smooth !important;
-    scroll-padding-top: 105px;
-}
-body, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
-    overflow-x: hidden !important;
-}
+
 .block-container {
-    width: min(92vw, 1080px) !important;
-    max-width: 1080px !important;
-    margin: 0 auto !important;
-    padding: 34px 0 72px !important;
+    max-width: 900px;
+    padding-top: 45px;
+    padding-bottom: 60px;
 }
 
-/* Typography */
-h1, h2, h3 {
-    color: #fff !important;
-    letter-spacing: -.035em !important;
-    font-weight: 750 !important;
-}
-h1 { font-size: clamp(2rem, 4vw, 3.2rem) !important; line-height: 1.05 !important; }
-h2 { font-size: clamp(1.45rem, 3vw, 2rem) !important; }
-h3 { font-size: 1.15rem !important; }
-p, label, .stMarkdown, .stCaption {
-    color: var(--muted);
-}
-[data-testid="stCaptionContainer"] { color: var(--muted) !important; }
-
-/* Glass cards */
 [data-testid="stVerticalBlockBorderWrapper"] {
-    background: linear-gradient(145deg, rgba(25,25,30,.88), rgba(12,12,16,.82)) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 20px !important;
-    padding: 14px !important;
-    margin-bottom: 14px !important;
-    box-shadow: var(--shadow);
+    background: rgba(30, 30, 32, 0.90) !important;
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
-}
-
-/* Inputs */
-.stTextInput input,
-.stNumberInput input,
-.stSelectbox [data-baseweb="select"] {
-    background: rgba(10,10,13,.72) !important;
-    color: #fff !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 12px !important;
-    min-height: 44px !important;
-    transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
-}
-.stTextInput input:focus,
-.stNumberInput input:focus {
-    border-color: rgba(255,255,255,.28) !important;
-    box-shadow: 0 0 0 3px rgba(255,255,255,.055) !important;
-}
-
-/* Buttons */
-.stButton > button {
-    width: 100%;
-    min-height: 44px;
-    background: linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.035)) !important;
-    color: #f8f8f8 !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 12px !important;
-    font-weight: 650 !important;
-    transition: transform .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease !important;
-}
-.stButton > button:hover {
-    background: rgba(255,255,255,.105) !important;
-    border-color: var(--border-hover) !important;
-    transform: translateY(-1px);
-    box-shadow: 0 8px 24px rgba(0,0,0,.22);
-}
-.stButton > button:active {
-    transform: translateY(0) scale(.985);
-}
-
-/* Dividers */
-hr {
-    border: 0 !important;
-    border-top: 1px solid rgba(255,255,255,.075) !important;
-    margin: 34px 0 !important;
-}
-
-/* Alerts */
-.stAlert {
-    background: rgba(18,18,22,.84) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 14px !important;
-}
-
-/* Navigation */
-.navigation-bar {
-    position: sticky;
-    top: 12px;
-    z-index: 999;
-    margin: 0 auto 34px;
-    padding: 9px;
-    background: rgba(13,13,17,.78);
-    border: 1px solid rgba(255,255,255,.095);
-    border-radius: 17px;
-    box-shadow: 0 16px 45px rgba(0,0,0,.32);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-}
-.navigation-title {
-    text-align: center;
-    color: #777780;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: .18em;
-    margin: 2px 0 8px;
-}
-.navigation-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
-}
-.navigation-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 38px;
-    padding: 7px 5px;
-    color: #dedee2 !important;
-    text-decoration: none !important;
-    background: rgba(255,255,255,.035);
-    border: 1px solid transparent;
-    border-radius: 10px;
-    font-size: 12px;
-    font-weight: 650;
-    transition: all .2s ease;
-}
-.navigation-link:hover {
-    color: #fff !important;
-    background: rgba(255,255,255,.085);
-    border-color: rgba(255,255,255,.09);
-    transform: translateY(-1px);
-}
-
-/* Calculator */
-.calculator-display input {
-    text-align: right !important;
-    font-size: 1.35rem !important;
-    font-weight: 650 !important;
-    letter-spacing: .02em;
-}
-
-/* Tables */
-div[data-testid="stTable"] {
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-}
-div[data-testid="stTable"] table {
-    background: rgba(13,13,17,.88) !important;
-}
-div[data-testid="stTable"] th {
-    background: rgba(255,255,255,.055) !important;
-    color: #fff !important;
-    font-weight: 700 !important;
-}
-div[data-testid="stTable"] td {
-    background: rgba(255,255,255,.018) !important;
-    color: #ddd !important;
-}
-
-/* Dialogs */
-[data-testid="stDialog"] > div {
-    background: rgba(15,15,19,.97) !important;
-    border: 1px solid rgba(255,255,255,.11) !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
     border-radius: 22px !important;
-    box-shadow: 0 30px 90px rgba(0,0,0,.62) !important;
+    padding: 8px !important;
+    margin-bottom: 14px !important;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.25);
 }
 
-/* Hide Streamlit chrome */
-#MainMenu, footer { visibility: hidden; }
-header { background: transparent !important; }
 
-/* Section anchors */
-.section-anchor {
-    display: block;
-    scroll-margin-top: 105px;
+/* Larger, brighter Grading Scale */
+div[data-testid="stTable"] table {
+    font-size: 20px !important;
+    background: rgba(25, 25, 28, 0.96) !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
 }
 
-/* Responsive */
+div[data-testid="stTable"] th {
+    color: #ffffff !important;
+    background: rgba(55, 55, 60, 0.98) !important;
+    font-size: 20px !important;
+    font-weight: 900 !important;
+    padding: 16px 14px !important;
+}
+
+div[data-testid="stTable"] td {
+    color: #ffffff !important;
+    font-size: 19px !important;
+    font-weight: 700 !important;
+    padding: 15px 14px !important;
+    background: rgba(35, 35, 38, 0.96) !important;
+}
+
+div[data-testid="stTable"] tr {
+    border-bottom: 1px solid rgba(255,255,255,0.16) !important;
+}
+
+h1, h2, h3 {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    letter-spacing: -1px;
+}
+
+.stTextInput input,
+.stNumberInput input {
+    background: rgba(30,30,32,0.90) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255,255,255,0.18) !important;
+    border-radius: 14px !important;
+    font-size: 16px !important;
+    padding: 12px !important;
+}
+
+.stButton > button {
+    background: rgba(40,40,43,0.95) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255,255,255,0.18) !important;
+    border-radius: 14px !important;
+    min-height: 48px;
+    font-weight: 600 !important;
+    transition: all 0.25s ease;
+}
+
+.stButton > button:hover {
+    background: rgba(65,65,70,0.98) !important;
+    border-color: rgba(255,255,255,0.35) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+hr {
+    border: none !important;
+    border-top: 1px solid rgba(255,255,255,0.18) !important;
+    margin: 40px 0 !important;
+}
+
+.stAlert {
+    background: rgba(30,30,32,0.90) !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
+    backdrop-filter: blur(15px);
+}
+
+@keyframes profilePopup {
+    0% {
+        opacity: 0;
+        transform: scale(0.75) translateY(40px);
+        filter: blur(10px);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.04) translateY(-5px);
+        filter: blur(2px);
+    }
+    75% {
+        opacity: 1;
+        transform: scale(0.98) translateY(2px);
+        filter: blur(0);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        filter: blur(0);
+    }
+}
+
+[data-testid="stDialog"] {
+    animation: profilePopup 0.6s cubic-bezier(0.22,1,0.36,1);
+}
+
+[data-testid="stDialog"] > div {
+    background: rgba(25,25,28,0.98) !important;
+    border: 1px solid rgba(255,255,255,0.18) !important;
+    border-radius: 28px !important;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.7) !important;
+}
+
+@keyframes resultPop {
+    0% {
+        opacity: 0;
+        transform: scale(0.7);
+    }
+    60% {
+        opacity: 1;
+        transform: scale(1.08);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes whooshIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-120px) scale(0.96);
+        filter: blur(10px);
+    }
+    40% {
+        opacity: 0.7;
+        transform: translateX(15px) scale(1.01);
+        filter: blur(3px);
+    }
+    70% {
+        opacity: 1;
+        transform: translateX(-4px) scale(1);
+        filter: blur(0);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+#MainMenu {
+    visibility: hidden;
+}
+
+footer {
+    visibility: hidden;
+}
+
+header {
+    background: transparent !important;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+
+# ==========================================================
+# RESPONSIVE PHONE + DESKTOP UI
+# ==========================================================
+
+st.markdown("""
+<style>
+
+/* Give desktop monitors more breathing room while keeping content readable. */
+.block-container {
+    width: min(94vw, 1180px) !important;
+    max-width: 1180px !important;
+    margin: 0 auto !important;
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+}
+
+/* Prevent accidental sideways scrolling. */
+html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+    overflow-x: hidden !important;
+}
+
+/* Make the app feel more spacious and polished on large screens. */
+@media (min-width: 1100px) {
+    .block-container {
+        padding-top: 52px !important;
+        padding-bottom: 80px !important;
+    }
+
+    h1 {
+        font-size: 3rem !important;
+    }
+
+    h2 {
+        font-size: 2rem !important;
+    }
+
+    h3 {
+        font-size: 1.35rem !important;
+    }
+}
+
+/* Tablet sizing. */
+@media (min-width: 769px) and (max-width: 1099px) {
+    .block-container {
+        width: min(94vw, 900px) !important;
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+    }
+}
+
+/* Phone-first sizing. */
 @media (max-width: 768px) {
     .block-container {
-        width: calc(100vw - 24px) !important;
-        max-width: none !important;
-        padding: 20px 0 48px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 22px 12px 48px 12px !important;
     }
-    .navigation-bar {
-        top: 7px;
-        margin-bottom: 24px;
-        border-radius: 15px;
-        padding: 7px;
+
+    h1 {
+        font-size: 2rem !important;
+        line-height: 1.12 !important;
+        margin-bottom: 0.45rem !important;
     }
-    .navigation-grid { gap: 4px; }
-    .navigation-link {
-        min-height: 36px;
-        padding: 6px 2px;
-        font-size: 10.5px;
-        white-space: nowrap;
+
+    h2 {
+        font-size: 1.45rem !important;
+        line-height: 1.2 !important;
     }
+
+    h3 {
+        font-size: 1.12rem !important;
+    }
+
+    p, label, .stMarkdown, .stText, .stCaption {
+        font-size: 0.96rem !important;
+    }
+
+    /* Smaller glass cards on narrow screens. */
     [data-testid="stVerticalBlockBorderWrapper"] {
-        padding: 11px !important;
-        border-radius: 17px !important;
+        border-radius: 18px !important;
+        padding: 6px !important;
+        margin-bottom: 10px !important;
     }
-    .stHorizontalBlock {
+
+    /* Keep calculator/scientific buttons in a 4-column row on phones. */
+    /* Streamlit can wrap column blocks on narrow screens; prevent that for rows containing buttons. */
+    .stHorizontalBlock:has(.stButton) {
+        flex-wrap: nowrap !important;
         gap: 6px !important;
     }
-    .stButton > button {
-        min-height: 42px !important;
-        font-size: .88rem !important;
-        padding: 7px 4px !important;
+
+    .stHorizontalBlock:has(.stButton) > div {
+        min-width: 0 !important;
+        flex: 1 1 0 !important;
     }
+
+    .stHorizontalBlock:has(.stButton) .stButton,
+    .stHorizontalBlock:has(.stButton) .stButton > button {
+        width: 100% !important;
+    }
+
+    .stButton > button {
+        min-height: 44px !important;
+        padding: 8px 4px !important;
+        border-radius: 12px !important;
+        font-size: 0.92rem !important;
+    }
+
+    /* Make inputs comfortable for touch. */
+    .stTextInput input,
+    .stNumberInput input {
+        min-height: 44px !important;
+        font-size: 16px !important;
+        border-radius: 12px !important;
+    }
+
+    /* Compact navigation that remains easy to tap. */
+    .navigation-bar {
+        top: 6px !important;
+        padding: 7px !important;
+        margin-bottom: 20px !important;
+        border-radius: 15px !important;
+    }
+
+    .navigation-title {
+        font-size: 11px !important;
+        margin-bottom: 6px !important;
+    }
+
+    .navigation-link {
+        padding: 9px 2px !important;
+        min-height: 38px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 11px !important;
+        border-radius: 10px !important;
+        line-height: 1.1 !important;
+    }
+
+    /* Make the grading table scroll horizontally instead of breaking the page. */
+    div[data-testid="stTable"] {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    div[data-testid="stTable"] table {
+        min-width: 560px !important;
+        font-size: 15px !important;
+    }
+
+    div[data-testid="stTable"] th {
+        font-size: 15px !important;
+        padding: 11px 10px !important;
+    }
+
+    div[data-testid="stTable"] td {
+        font-size: 14px !important;
+        padding: 10px !important;
+    }
+
+    /* Reduce the huge section spacers on phones so scrolling feels natural. */
+    .mobile-section-spacer {
+        height: 18vh !important;
+    }
+
+    /* Keep dialogs inside the phone viewport. */
+    [data-testid="stDialog"] > div {
+        width: calc(100vw - 24px) !important;
+        max-width: calc(100vw - 24px) !important;
+        border-radius: 22px !important;
+    }
+}
+
+/* Very small phones. */
+@media (max-width: 420px) {
+    .block-container {
+        padding-left: 9px !important;
+        padding-right: 9px !important;
+    }
+
+    .navigation-link {
+        font-size: 10px !important;
+        padding-left: 1px !important;
+        padding-right: 1px !important;
+    }
+
+    .stButton > button {
+        font-size: 0.84rem !important;
+        min-height: 42px !important;
+    }
+
     .stTextInput input,
     .stNumberInput input {
         font-size: 16px !important;
     }
-    div[data-testid="stTable"] {
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch;
-    }
-    div[data-testid="stTable"] table {
-        min-width: 560px;
-    }
-    [data-testid="stDialog"] > div {
-        width: calc(100vw - 24px) !important;
-        max-width: calc(100vw - 24px) !important;
-    }
-}
-@media (max-width: 390px) {
-    .block-container { width: calc(100vw - 18px) !important; }
-    .navigation-link { font-size: 9.5px; }
-    .stButton > button { font-size: .82rem !important; }
 }
 
-/* Existing animations, refined */
-@keyframes resultPop {
-    0% { opacity: 0; transform: scale(.92); }
-    100% { opacity: 1; transform: scale(1); }
-}
 </style>
 """, unsafe_allow_html=True)
+
 
 # ==========================================================
 # NAVIGATION SYSTEM
 # ==========================================================
 
+# Small navigation bar that jumps to each section.
+# The sections remain on the same page, so normal scrolling
+# still works too.
+
+st.markdown("""
+<style>
+
+/* Smooth scrolling when using the navigation links */
+html,
+body,
+.stApp,
+[data-testid="stAppViewContainer"],
+[data-testid="stMain"],
+.main,
+.block-container {
+    scroll-behavior: smooth !important;
+    scroll-padding-top: 120px !important;
+}
+
+/* Keep section targets from stopping underneath the sticky navigation */
+.section-anchor {
+    scroll-margin-top: 120px !important;
+}
+
+.navigation-bar {
+    position: sticky;
+    top: 10px;
+    z-index: 999;
+    background: rgba(25, 25, 28, 0.96);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 18px;
+    padding: 10px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+}
+
+.navigation-title {
+    text-align: center;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.navigation-link {
+    display: block;
+    text-align: center;
+    text-decoration: none !important;
+    color: #ffffff !important;
+    background: rgba(55,55,60,0.95);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    padding: 10px 4px;
+    font-size: 13px;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.navigation-link:hover {
+    background: rgba(80,80,86,0.98);
+    transform: translateY(-2px);
+}
+
+.section-anchor {
+    scroll-margin-top: 100px;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+
 # Navigation bar
 st.markdown("""
 <div class="navigation-bar">
     <div class="navigation-title">QUICK NAVIGATION</div>
-    <div class="navigation-grid">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
         <a class="navigation-link" href="#profile">👤 Profile</a>
         <a class="navigation-link" href="#calculator">🧮 Calculator</a>
         <a class="navigation-link" href="#grading">🎓 Grading</a>
@@ -500,7 +651,7 @@ if st.button(
 # ==========================================================
 
 # Extra vertical space so this section occupies its own screen when scrolling.
-st.markdown('<div style="height: 8vh;"></div>', unsafe_allow_html=True)
+st.markdown('<div style="height: 70vh;"></div>', unsafe_allow_html=True)
 
 # SCIENTIFIC CALCULATOR
 # ==========================================================
@@ -772,7 +923,7 @@ if st.session_state.calc_result:
 # ==========================================================
 
 # Extra vertical space so this section occupies its own screen when scrolling.
-st.markdown('<div style="height: 8vh;"></div>', unsafe_allow_html=True)
+st.markdown('<div style="height: 70vh;"></div>', unsafe_allow_html=True)
 
 # GRADE CALCULATOR
 # ==========================================================
@@ -1240,7 +1391,7 @@ st.table({
 # ==========================================================
 
 # Extra vertical space so this section occupies its own screen when scrolling.
-st.markdown('<div style="height: 8vh;"></div>', unsafe_allow_html=True)
+st.markdown('<div style="height: 70vh;"></div>', unsafe_allow_html=True)
 
 # QUIZ MASTER
 # ==========================================================
