@@ -11,7 +11,7 @@ import streamlit.components.v1 as components
 # ==========================================================
 
 st.set_page_config(
-    page_title="My Profile & Grade Calculator",
+    page_title="Essentials",
     page_icon="🎓",
     layout="centered",
 )
@@ -459,6 +459,16 @@ html, body, .stApp,
     scroll-margin-top: var(--nav-offset);
 }
 
+/* ---------- brand mark ---------- */
+.brand-mark {
+    text-align: center;
+    color: var(--label);
+    font-weight: 600;
+    font-size: 1.05rem;
+    letter-spacing: -0.02em;
+    margin: 4px 0 14px 0;
+}
+
 /* ---------- navigation (segmented control) ---------- */
 .navigation-bar {
     position: sticky;
@@ -585,6 +595,7 @@ html, body, .stApp,
 
     .stTextInput input, .stNumberInput input { min-height: 44px !important; font-size: 16px !important; }
 
+    .brand-mark { font-size: 0.95rem; margin-bottom: 10px; }
     .navigation-bar { top: 6px; padding: 4px; gap: 3px; margin-bottom: 22px; }
     .navigation-link { font-size: 0.74rem; padding: 9px 2px; min-height: 36px; }
 
@@ -619,6 +630,7 @@ html, body, .stApp,
 
 st.markdown(
     """
+<div class="brand-mark">Essentials</div>
 <div class="navigation-bar">
     <a class="navigation-link" href="#profile" data-smooth="profile">Profile</a>
     <a class="navigation-link" href="#calculator" data-smooth="calculator">Calculator</a>
@@ -853,9 +865,9 @@ def calculate_result():
 
     allowed = {
         "sqrt": math.sqrt,
-        "sin": math.sin,
-        "cos": math.cos,
-        "tan": math.tan,
+        "sin": lambda degrees: math.sin(math.radians(degrees)),
+        "cos": lambda degrees: math.cos(math.radians(degrees)),
+        "tan": lambda degrees: math.tan(math.radians(degrees)),
         "log": math.log10,
         "ln": math.log,
         "pi": math.pi,
