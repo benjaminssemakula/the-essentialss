@@ -67,7 +67,66 @@ st.markdown(
         z-index: -9;
     }}
 
-    </style>
+    
+    /* Compact mobile calculator */
+    @media (max-width: 600px) {
+        .calculator-display {
+            margin-bottom: 0.35rem !important;
+        }
+
+        div[data-testid="stHorizontalBlock"]:has(.calculator-display) {
+            gap: 0.2rem !important;
+        }
+
+        .stButton > button {
+            min-height: 42px !important;
+            padding: 0.35rem 0.25rem !important;
+            font-size: 0.88rem !important;
+        }
+
+        input, textarea, select {
+            font-size: 0.9rem !important;
+        }
+
+        div[data-testid="stHorizontalBlock"] {
+            gap: 0.35rem !important;
+        }
+    }
+
+
+    /* Stronger backdrop blur for readability */
+    .glass-card,
+    .stExpander,
+    div[data-testid="stMetric"],
+    div[data-testid="stDataFrame"],
+    div[data-testid="stForm"],
+    div[data-testid="stPopover"],
+    div[data-testid="stDialog"] > div {
+        backdrop-filter: blur(18px) saturate(115%) !important;
+        -webkit-backdrop-filter: blur(18px) saturate(115%) !important;
+        background: rgba(10, 12, 16, 0.72) !important;
+        border-color: rgba(255, 255, 255, 0.10) !important;
+    }
+
+    /* Keep text crisp above the blurred background */
+    .main .block-container {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Subtle readability veil behind the main content */
+    .main .block-container::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background: rgba(0, 0, 0, 0.12);
+        backdrop-filter: blur(3px);
+        -webkit-backdrop-filter: blur(3px);
+    }
+
+</style>
 
     <div class="custom-background">
         <video autoplay muted loop playsinline>
