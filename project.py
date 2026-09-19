@@ -314,21 +314,30 @@ html, body,
     background: var(--blue-hi) !important;
 }
 
-/* Calculator keypad: circular keys, operators in amber. */
+/* Calculator: a compact, centred keypad instead of one that fills the page. */
+.st-key-calc_keys,
+.st-key-sci_keys,
+.calc-shell {
+    max-width: 392px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
 .st-key-calc_keys .stButton > button,
 .st-key-sci_keys .stButton > button {
-    aspect-ratio: 1 / 1;
-    min-height: 0;
-    height: auto;
+    height: 56px;
+    min-height: 56px;
+    padding: 0 !important;
     border-radius: var(--r-pill) !important;
-    font-size: 1.22rem !important;
+    font-size: 1.08rem !important;
     font-weight: 400 !important;
     background: rgba(255, 255, 255, 0.11) !important;
 }
 
 .st-key-sci_keys .stButton > button {
-    font-size: 1rem !important;
-    aspect-ratio: 1.9 / 1;
+    height: 44px;
+    min-height: 44px;
+    font-size: 0.94rem !important;
 }
 
 .st-key-divide .stButton > button,
@@ -359,12 +368,12 @@ html, body,
 /* Calculator readout */
 .calc-readout {
     text-align: right;
-    font-size: 2.5rem;
+    font-size: 2.15rem;
     font-weight: 300;
     letter-spacing: -0.03em;
     color: #ffffff;
-    padding: 20px 20px 22px 20px;
-    min-height: 92px;
+    padding: 16px 18px 18px 18px;
+    min-height: 76px;
     word-break: break-all;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--hairline);
@@ -567,10 +576,12 @@ html, body, .stApp,
     .stHorizontalBlock:has(.stButton) .stButton > button { width: 100% !important; }
 
     .stButton > button { min-height: 44px !important; font-size: 0.92rem !important; padding: 8px 6px !important; }
-    .st-key-calc_keys .stButton > button { font-size: 1.1rem !important; }
-    .st-key-sci_keys .stButton > button { font-size: 0.9rem !important; }
 
-    .calc-readout { font-size: 2rem; min-height: 76px; padding: 16px; }
+    .st-key-calc_keys, .st-key-sci_keys, .calc-shell { max-width: 100%; }
+    .st-key-calc_keys .stButton > button { height: 52px; min-height: 52px; font-size: 1.05rem !important; }
+    .st-key-sci_keys .stButton > button { height: 42px; min-height: 42px; font-size: 0.88rem !important; }
+
+    .calc-readout { font-size: 1.9rem; min-height: 68px; padding: 14px 16px; }
 
     .stTextInput input, .stNumberInput input { min-height: 44px !important; font-size: 16px !important; }
 
@@ -630,117 +641,159 @@ components.html(
     const doc = window.parent.document;
     const win = window.parent;
 
-    if (doc.__smoothNavVersion === 3) return;
-    doc.__smoothNavVersion = 3;
+    if (doc.__smoothNavVersion === 4) return;
+    doc.__smoothNavVersion = 4;
 
     const OFFSET = 100;
     const DURATION = 620;
 
-    function prefersReduced() {
-        return win.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reduced = () => win.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const easeInOutCubic = (t) =>
+        t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+    /* Temporarily disable CSS smooth scrolling so our own easing isn't fought. */
+    function withInstantScroll(element, work) {
+        const previous = element.style.scrollBehavior;
+        element.style.setProperty('scroll-behavior', 'auto', 'important');
+        const outcome = work();
+        element.style.scrollBehavior = previous;
+        return outcome;
     }
 
-    /* Probe: nudge a candidate and see whether the target actually moved. */
+    /* Probe every ancestor: whichever one actually moves the target is the
+       real scroll container. Streamlit uses different ones on desktop,
+       mobile, and inside embeds, so guessing by CSS overflow is unreliable. */
     function findScroller(target) {
         let node = target.parentElement;
 
         while (node) {
             if (node.scrollHeight - node.clientHeight > 4) {
-                const previousBehavior = node.style.scrollBehavior;
-                node.style.scrollBehavior = 'auto';
-
-                const startTop = node.scrollTop;
-                const targetTop = target.getBoundingClientRect().top;
-
-                node.scrollTop = startTop + 2;
-                const moved = Math.abs(target.getBoundingClientRect().top - targetTop) > 0.5;
-
-                node.scrollTop = startTop;
-                node.style.scrollBehavior = previousBehavior;
+                const moved = withInstantScroll(node, function () {
+                    const startTop = node.scrollTop;
+                    const before = target.getBoundingClientRect().top;
+                    node.scrollTop = startTop + 2;
+                    const shifted = Math.abs(target.getBoundingClientRect().top - before) > 0.5;
+                    node.scrollTop = startTop;
+                    return shifted;
+                });
 
                 if (moved) return node;
             }
             node = node.parentElement;
         }
 
-        return null; /* fall back to the window */
+        const root = doc.scrollingElement || doc.documentElement;
+        if (root && root.scrollHeight - root.clientHeight > 4) return root;
+
+        return null;
     }
 
-    function easeInOutCubic(t) {
-        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-    }
-
-    function animate(getCurrent, setTo, distance) {
-        const start = getCurrent();
+    function tween(read, write, distance, done) {
+        const start = read();
         const startTime = win.performance.now();
 
         function frame(now) {
             const progress = Math.min((now - startTime) / DURATION, 1);
-            setTo(start + distance * easeInOutCubic(progress));
-            if (progress < 1) win.requestAnimationFrame(frame);
+            write(start + distance * easeInOutCubic(progress));
+            if (progress < 1) {
+                win.requestAnimationFrame(frame);
+            } else if (done) {
+                done();
+            }
         }
 
         win.requestAnimationFrame(frame);
     }
 
-    function scrollToTarget(target) {
+    function manualScroll(target) {
         const scroller = findScroller(target);
-        const instant = prefersReduced();
+        if (!scroller) return false;
 
-        if (scroller) {
-            const distance =
-                target.getBoundingClientRect().top -
-                scroller.getBoundingClientRect().top -
-                OFFSET;
-
-            const previousBehavior = scroller.style.scrollBehavior;
-            scroller.style.scrollBehavior = 'auto';
-
-            const restore = () => { scroller.style.scrollBehavior = previousBehavior; };
-
-            if (instant) {
-                scroller.scrollTop = scroller.scrollTop + distance;
-                restore();
-            } else {
-                animate(
-                    () => scroller.scrollTop,
-                    (value) => { scroller.scrollTop = value; },
-                    distance
-                );
-                win.setTimeout(restore, DURATION + 60);
-            }
-            return;
-        }
-
-        const distance = target.getBoundingClientRect().top - OFFSET;
         const root = doc.scrollingElement || doc.documentElement;
-        const previousBehavior = root.style.scrollBehavior;
-        root.style.scrollBehavior = 'auto';
+        const usesWindow = scroller === root || scroller === doc.documentElement || scroller === doc.body;
 
-        if (instant) {
-            win.scrollTo(0, win.scrollY + distance);
-            root.style.scrollBehavior = previousBehavior;
-        } else {
-            animate(
-                () => win.scrollY,
-                (value) => { win.scrollTo(0, value); },
-                distance
-            );
-            win.setTimeout(() => { root.style.scrollBehavior = previousBehavior; }, DURATION + 60);
+        const distance = usesWindow
+            ? target.getBoundingClientRect().top - OFFSET
+            : target.getBoundingClientRect().top - scroller.getBoundingClientRect().top - OFFSET;
+
+        if (Math.abs(distance) < 1) return true;
+
+        const previous = scroller.style.scrollBehavior;
+        scroller.style.setProperty('scroll-behavior', 'auto', 'important');
+        const restore = () => { scroller.style.scrollBehavior = previous; };
+
+        if (reduced()) {
+            if (usesWindow) win.scrollTo(0, win.scrollY + distance);
+            else scroller.scrollTop += distance;
+            restore();
+            return true;
         }
+
+        if (usesWindow) {
+            tween(() => win.scrollY, (value) => win.scrollTo(0, value), distance, restore);
+        } else {
+            tween(
+                () => scroller.scrollTop,
+                (value) => { scroller.scrollTop = value; },
+                distance,
+                restore
+            );
+        }
+
+        return true;
+    }
+
+    function scrollToTarget(target) {
+        const before = target.getBoundingClientRect().top;
+
+        /* Native first: the browser knows about nested scroll containers and
+           honours scroll-margin-top. */
+        let nativeWorked = false;
+        try {
+            target.scrollIntoView({
+                behavior: reduced() ? 'auto' : 'smooth',
+                block: 'start',
+                inline: 'nearest'
+            });
+            nativeWorked = true;
+        } catch (error) {
+            nativeWorked = false;
+        }
+
+        /* If nothing has budged shortly after, drive it ourselves. */
+        win.setTimeout(function () {
+            const after = target.getBoundingClientRect().top;
+            const stillNeeded = Math.abs(after - OFFSET) > 6;
+            if (!nativeWorked || (Math.abs(after - before) < 2 && stillNeeded)) {
+                manualScroll(target);
+            }
+        }, 180);
     }
 
     doc.addEventListener('click', function (event) {
-        const link = event.target.closest && event.target.closest('a[data-smooth]');
+        const link = event.target && event.target.closest
+            ? event.target.closest('a[data-smooth]')
+            : null;
+
         if (!link) return;
 
         const target = doc.getElementById(link.getAttribute('data-smooth'));
         if (!target) return;
 
         event.preventDefault();
-        event.stopPropagation();
         scrollToTarget(target);
     }, true);
+
+    /* Small readout for the troubleshooting expander, if it's open. */
+    win.__smoothNavReport = function () {
+        const target = doc.getElementById('calculator');
+        if (!target) return 'anchor not found';
+        const scroller = findScroller(target);
+        if (!scroller) return 'no scrollable container found';
+        return (scroller.tagName.toLowerCase()
+            + (scroller.getAttribute('data-testid') ? '[' + scroller.getAttribute('data-testid') + ']' : '')
+            + ' — scrollHeight ' + scroller.scrollHeight + ', clientHeight ' + scroller.clientHeight);
+    };
 })();
 </script>
 """,
@@ -895,7 +948,10 @@ def show_calculator_result():
 
 
 readout = st.session_state.calc_display or '<span class="placeholder">0</span>'
-st.markdown(f'<div class="calc-readout">{readout}</div>', unsafe_allow_html=True)
+st.markdown(
+    f'<div class="calc-readout calc-shell">{readout}</div>',
+    unsafe_allow_html=True,
+)
 
 
 calculator_rows = [
@@ -1373,3 +1429,43 @@ if st.session_state.quiz_finished:
             st.rerun()
 
     show_quiz_result()
+
+
+# ==========================================================
+# TROUBLESHOOTING
+# Open this if the navigation ever stops scrolling smoothly —
+# it reports which element the page is actually scrolling.
+# ==========================================================
+
+with st.expander("Navigation troubleshooting"):
+    st.markdown(
+        '<p class="lede" style="margin-bottom:12px">'
+        "This shows which element your browser is scrolling. If it says "
+        "no scrollable container found, send me that line.</p>",
+        unsafe_allow_html=True,
+    )
+
+    components.html(
+        """
+<div style="font:13px -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;
+            color:rgba(255,255,255,0.88);padding:2px 0;">
+    <span id="report">checking…</span>
+</div>
+<script>
+(function () {
+    const output = document.getElementById('report');
+    function update() {
+        try {
+            output.textContent = window.parent.__smoothNavReport
+                ? window.parent.__smoothNavReport()
+                : 'navigation script did not load';
+        } catch (error) {
+            output.textContent = 'blocked from reading the page: ' + error.message;
+        }
+    }
+    setTimeout(update, 300);
+})();
+</script>
+""",
+        height=40,
+    )
