@@ -4,17 +4,17 @@ import base64
 import math
 
 # ==========================================================
-# PAGE CONFIGURATION
+# PAGE SETTINGS
 # ==========================================================
 
 st.set_page_config(
-    page_title="Essentials | Profile, Calculator & Grading",
-    page_icon="⚡",
-    layout="wide"
+    page_title="My Streamlit App",
+    page_icon="🎓",
+    layout="centered"
 )
 
 # ==========================================================
-# BACKGROUND VIDEO INJECTOR (CLEAN HTML)
+# CUSTOM LIVE VIDEO BACKGROUND
 # ==========================================================
 
 video_path = os.path.join(
@@ -22,454 +22,439 @@ video_path = os.path.join(
     "background.mp4"
 )
 
-video_base64 = ""
-if os.path.exists(video_path):
-    with open(video_path, "rb") as video_file:
-        video_base64 = base64.b64encode(video_file.read()).decode()
+with open(video_path, "rb") as video_file:
+    video_bytes = video_file.read()
 
-video_html = f"<video autoplay loop muted playsinline preload='auto'><source src='data:video/mp4;base64,{video_base64}' type='video/mp4'></video>" if video_base64 else ""
+video_base64 = base64.b64encode(video_bytes).decode()
 
 st.markdown(
-    f"""<style>
-    .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {{
+    f"""
+    <style>
+
+    /* Make the Streamlit background transparent */
+    .stApp {{
         background: transparent !important;
     }}
 
-    #bg-video-container {{
+    /* Video background */
+    .custom-background {{
         position: fixed;
         top: 0;
         left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: -100;
+        width: 100%;
+        height: 100%;
+        z-index: -10;
         overflow: hidden;
-        pointer-events: none;
     }}
 
-    #bg-video-container video {{
-        min-width: 100%;
-        min-height: 100%;
-        width: auto;
-        height: auto;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+    .custom-background video {{
+        width: 100%;
+        height: 100%;
         object-fit: cover;
-        filter: brightness(0.65) contrast(1.05);
+        position: absolute;
+        top: 0;
+        left: 0;
     }}
 
-    #bg-overlay {{
+    /* Dark overlay so text is easier to see */
+    .background-overlay {{
         position: fixed;
         top: 0;
         left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: radial-gradient(circle at 50% 20%, rgba(24, 24, 27, 0.45) 0%, rgba(9, 9, 11, 0.75) 100%);
-        z-index: -99;
-        backdrop-filter: blur(4px);
-        -webkit-backdrop-filter: blur(4px);
-        pointer-events: none;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.35);
+        z-index: -9;
     }}
+
     </style>
-    <div id="bg-video-container">{video_html}</div>
-    <div id="bg-overlay"></div>""",
+
+    <div class="custom-background">
+        <video autoplay muted loop playsinline>
+            <source
+                src="data:video/mp4;base64,{video_base64}"
+                type="video/mp4"
+            >
+        </video>
+    </div>
+
+    <div class="background-overlay"></div>
+    """,
     unsafe_allow_html=True
 )
 
 # ==========================================================
-# ESSENTIALS DESIGN SYSTEM & STYLING
+# ESSENTIALS APP
+# ==========================================================
+
+# ==========================================================
+# CLEAN DARK DESIGN SYSTEM
 # ==========================================================
 
 st.markdown("""
 <style>
+:root {
+    --bg: #07070a;
+    --surface: rgba(17, 17, 21, 0.82);
+    --surface-strong: rgba(22, 22, 27, 0.94);
+    --border: rgba(255,255,255,.09);
+    --border-hover: rgba(255,255,255,.18);
+    --text: #f5f5f7;
+    --muted: #9a9aa3;
+    --accent: #d4d4d8;
+    --shadow: 0 18px 55px rgba(0,0,0,.34);
+}
+
+/* Base */
+.stApp {
+    color: var(--text);
+    background: transparent !important;
+}
 html {
     scroll-behavior: smooth !important;
-    scroll-padding-top: 100px;
+    scroll-padding-top: 105px;
 }
-
-body {
-    scroll-behavior: smooth;
+body, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+    overflow-x: hidden !important;
 }
-
-[data-testid="stAppViewContainer"] {
-    scroll-behavior: smooth !important;
-}
-
 .block-container {
-    width: min(92vw, 1200px) !important;
-    max-width: 1200px !important;
+    width: min(92vw, 1080px) !important;
+    max-width: 1080px !important;
     margin: 0 auto !important;
-    padding-top: 20px !important;
-    padding-bottom: 80px !important;
+    padding: 34px 0 72px !important;
 }
 
-.section-anchor {
-    scroll-margin-top: 110px;
-    display: block;
+/* Typography */
+h1, h2, h3 {
+    color: #fff !important;
+    letter-spacing: -.035em !important;
+    font-weight: 750 !important;
+}
+h1 { font-size: clamp(2rem, 4vw, 3.2rem) !important; line-height: 1.05 !important; }
+h2 { font-size: clamp(1.45rem, 3vw, 2rem) !important; }
+h3 { font-size: 1.15rem !important; }
+p, label, .stMarkdown, .stCaption {
+    color: var(--muted);
+}
+[data-testid="stCaptionContainer"] { color: var(--muted) !important; }
+
+/* Glass cards */
+[data-testid="stVerticalBlockBorderWrapper"] {
+    background: linear-gradient(145deg, rgba(25,25,30,.88), rgba(12,12,16,.82)) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 20px !important;
+    padding: 14px !important;
+    margin-bottom: 14px !important;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
 }
 
-h1, h2, h3, h4 {
-    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif !important;
-    letter-spacing: -0.025em !important;
+/* Inputs */
+.stTextInput input,
+.stNumberInput input,
+.stSelectbox [data-baseweb="select"] {
+    background: rgba(10,10,13,.72) !important;
+    color: #fff !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 12px !important;
+    min-height: 44px !important;
+    transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+.stTextInput input:focus,
+.stNumberInput input:focus {
+    border-color: rgba(255,255,255,.28) !important;
+    box-shadow: 0 0 0 3px rgba(255,255,255,.055) !important;
 }
 
-.essentials-gradient-text {
-    background: linear-gradient(135deg, #f4f4f5 0%, #a1a1aa 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-weight: 800;
+/* Buttons */
+.stButton > button {
+    width: 100%;
+    min-height: 44px;
+    background: linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.035)) !important;
+    color: #f8f8f8 !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 12px !important;
+    font-weight: 650 !important;
+    transition: transform .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease !important;
+}
+.stButton > button:hover {
+    background: rgba(255,255,255,.105) !important;
+    border-color: var(--border-hover) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(0,0,0,.22);
+}
+.stButton > button:active {
+    transform: translateY(0) scale(.985);
 }
 
-.essentials-badge {
-    display: inline-block;
-    background: rgba(161, 161, 170, 0.12);
-    border: 1px solid rgba(161, 161, 170, 0.25);
-    border-radius: 8px;
-    padding: 4px 10px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    color: #e4e4e7;
-    margin-bottom: 8px;
-    text-transform: uppercase;
+/* Dividers */
+hr {
+    border: 0 !important;
+    border-top: 1px solid rgba(255,255,255,.075) !important;
+    margin: 34px 0 !important;
 }
 
-/* NAVIGATION BAR */
+/* Alerts */
+.stAlert {
+    background: rgba(18,18,22,.84) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 14px !important;
+}
+
+/* Navigation */
 .navigation-bar {
     position: sticky;
-    top: 15px;
-    z-index: 9999;
-    background: rgba(24, 24, 27, 0.85);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 20px;
-    padding: 10px 14px;
-    margin-bottom: 32px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    top: 12px;
+    z-index: 999;
+    margin: 0 auto 34px;
+    padding: 9px;
+    background: rgba(13,13,17,.78);
+    border: 1px solid rgba(255,255,255,.095);
+    border-radius: 17px;
+    box-shadow: 0 16px 45px rgba(0,0,0,.32);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 }
-
 .navigation-title {
     text-align: center;
-    color: #71717a;
+    color: #777780;
     font-size: 10px;
     font-weight: 800;
-    letter-spacing: 0.14em;
-    margin-bottom: 8px;
+    letter-spacing: .18em;
+    margin: 2px 0 8px;
 }
-
-.nav-grid {
+.navigation-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
+    gap: 6px;
 }
-
 .navigation-link {
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: 38px;
+    padding: 7px 5px;
+    color: #dedee2 !important;
     text-decoration: none !important;
-    color: #e4e4e7 !important;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
-    padding: 10px 6px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    background: rgba(255,255,255,.035);
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 650;
+    transition: all .2s ease;
 }
-
 .navigation-link:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
-    color: #ffffff !important;
+    color: #fff !important;
+    background: rgba(255,255,255,.085);
+    border-color: rgba(255,255,255,.09);
+    transform: translateY(-1px);
 }
 
-[data-testid="stVerticalBlockBorderWrapper"] {
-    background: rgba(24, 24, 27, 0.6) !important;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 20px !important;
-    padding: 16px !important;
-    margin-bottom: 16px !important;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+/* Calculator */
+.calculator-display input {
+    text-align: right !important;
+    font-size: 1.35rem !important;
+    font-weight: 650 !important;
+    letter-spacing: .02em;
 }
 
-.stTextInput input, .stNumberInput input, .stSelectbox select {
-    background: rgba(24, 24, 27, 0.7) !important;
-    color: #ffffff !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    border-radius: 12px !important;
-    padding: 10px 14px !important;
+/* Tables */
+div[data-testid="stTable"] {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
 }
-
-.stTextInput input:focus, .stNumberInput input:focus {
-    border-color: #a1a1aa !important;
-    box-shadow: 0 0 0 3px rgba(161, 161, 170, 0.2) !important;
-}
-
-/* COMPACT CALCULATOR BUTTONS FOR MOBILE & DESKTOP */
-.stButton > button {
-    background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%) !important;
-    color: #ffffff !important;
-    border: 1px solid rgba(255, 255, 255, 0.14) !important;
-    border-radius: 12px !important;
-    min-height: 42px !important;
-    padding: 4px 8px !important;
-    font-size: 15px !important;
-    font-weight: 600 !important;
-    transition: all 0.2s ease !important;
-}
-
-.stButton > button:hover {
-    background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 100%) !important;
-    border-color: rgba(255, 255, 255, 0.3) !important;
-    transform: translateY(-1px) !important;
-}
-
-/* Reduce column padding inside calculator grid */
-[data-testid="column"] {
-    padding: 0 2px !important;
-}
-
 div[data-testid="stTable"] table {
-    background: rgba(24, 24, 27, 0.75) !important;
-    border-radius: 16px !important;
-    overflow: hidden !important;
-    border: 1px solid rgba(255,255,255,0.1) !important;
+    background: rgba(13,13,17,.88) !important;
 }
-
 div[data-testid="stTable"] th {
-    color: #f4f4f5 !important;
-    background: rgba(39, 39, 42, 0.9) !important;
+    background: rgba(255,255,255,.055) !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+}
+div[data-testid="stTable"] td {
+    background: rgba(255,255,255,.018) !important;
+    color: #ddd !important;
 }
 
+/* Dialogs */
 [data-testid="stDialog"] > div {
-    background: rgba(24, 24, 27, 0.95) !important;
-    border: 1px solid rgba(255, 255, 255, 0.16) !important;
-    border-radius: 24px !important;
+    background: rgba(15,15,19,.97) !important;
+    border: 1px solid rgba(255,255,255,.11) !important;
+    border-radius: 22px !important;
+    box-shadow: 0 30px 90px rgba(0,0,0,.62) !important;
 }
 
-.section-divider {
-    border: none;
-    border-top: 1px solid rgba(255,255,255,0.1);
-    margin: 40px 0;
-}
-
-/* Hide Streamlit Chrome */
-#MainMenu { visibility: hidden; }
-footer { visibility: hidden; }
+/* Hide Streamlit chrome */
+#MainMenu, footer { visibility: hidden; }
 header { background: transparent !important; }
 
+/* Section anchors */
+.section-anchor {
+    display: block;
+    scroll-margin-top: 105px;
+}
 
-/* RESPONSIVE MOBILE LAYOUT */
-@media (max-width: 640px) {
+/* Responsive */
+@media (max-width: 768px) {
     .block-container {
         width: calc(100vw - 24px) !important;
         max-width: none !important;
-        padding-left: 12px !important;
-        padding-right: 12px !important;
-        padding-top: 12px !important;
-        padding-bottom: 48px !important;
+        padding: 20px 0 48px !important;
     }
-
     .navigation-bar {
-        top: 8px;
-        border-radius: 16px;
-        padding: 8px;
+        top: 7px;
         margin-bottom: 24px;
+        border-radius: 15px;
+        padding: 7px;
     }
-
-    .nav-grid {
-        gap: 5px;
-    }
-
+    .navigation-grid { gap: 4px; }
     .navigation-link {
-        min-width: 0;
-        padding: 9px 3px;
-        font-size: 11px;
-        border-radius: 10px;
+        min-height: 36px;
+        padding: 6px 2px;
+        font-size: 10.5px;
         white-space: nowrap;
     }
-
-    .section-anchor {
-        scroll-margin-top: 82px;
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        padding: 11px !important;
+        border-radius: 17px !important;
     }
-
+    .stHorizontalBlock {
+        gap: 6px !important;
+    }
     .stButton > button {
-        min-width: 0 !important;
-        min-height: 38px !important;
-        height: 38px !important;
-        padding: 2px 3px !important;
-        font-size: 13px !important;
-        line-height: 1 !important;
-        border-radius: 9px !important;
-        white-space: nowrap !important;
+        min-height: 42px !important;
+        font-size: .88rem !important;
+        padding: 7px 4px !important;
     }
-
-    [data-testid="column"] {
-        padding-left: 1px !important;
-        padding-right: 1px !important;
-        min-width: 0 !important;
-    }
-
-    /* Keep the calculator's 5-column grid inside the phone viewport. */
-    [data-testid="stHorizontalBlock"] {
-        gap: 4px !important;
-    }
-
     .stTextInput input,
     .stNumberInput input {
-        min-width: 0 !important;
-        font-size: 14px !important;
+        font-size: 16px !important;
     }
-
-    div[data-testid="stVerticalBlockBorderWrapper"] {
-        padding: 12px !important;
-        border-radius: 16px !important;
+    div[data-testid="stTable"] {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+    div[data-testid="stTable"] table {
+        min-width: 560px;
+    }
+    [data-testid="stDialog"] > div {
+        width: calc(100vw - 24px) !important;
+        max-width: calc(100vw - 24px) !important;
     }
 }
+@media (max-width: 390px) {
+    .block-container { width: calc(100vw - 18px) !important; }
+    .navigation-link { font-size: 9.5px; }
+    .stButton > button { font-size: .82rem !important; }
+}
 
-@media (max-width: 380px) {
-    .navigation-link {
-        font-size: 10px;
-        padding-left: 1px;
-        padding-right: 1px;
-    }
-
-    .stButton > button {
-        min-height: 36px !important;
-        height: 36px !important;
-        font-size: 12px !important;
-    }
+/* Existing animations, refined */
+@keyframes resultPop {
+    0% { opacity: 0; transform: scale(.92); }
+    100% { opacity: 1; transform: scale(1); }
 }
 </style>
 """, unsafe_allow_html=True)
 
 # ==========================================================
-# NAVIGATION BAR (GUARANTEED SMOOTH SCROLL JAVASCRIPT)
+# NAVIGATION SYSTEM
 # ==========================================================
 
+# Navigation bar
 st.markdown("""
 <div class="navigation-bar">
-    <div class="navigation-title">ESSENTIALS</div>
-    <div class="nav-grid">
+    <div class="navigation-title">QUICK NAVIGATION</div>
+    <div class="navigation-grid">
         <a class="navigation-link" href="#profile">👤 Profile</a>
         <a class="navigation-link" href="#calculator">🧮 Calculator</a>
-        <a class="navigation-link" href="#grading">🎓 Grades</a>
-        <a class="navigation-link" href="#quiz-maker">🧠 Quiz</a>
+        <a class="navigation-link" href="#grading">🎓 Grading</a>
+        <a class="navigation-link" href="#quiz-maker">🧠 Quiz Maker</a>
     </div>
 </div>
-
-
 """, unsafe_allow_html=True)
 
+
 # ==========================================================
-# 1. PROFILE SECTION
+# PROFILE
 # ==========================================================
 
 st.markdown('<div id="profile" class="section-anchor"></div>', unsafe_allow_html=True)
 
-st.markdown("""
-<div style="margin-bottom: 20px;">
-    <span class="essentials-badge">USER PROFILE</span>
-    <h1 class="essentials-gradient-text" style="margin: 4px 0 8px 0; font-size: 2.2rem;">Personal Details</h1>
-    <p style="color: #a1a1aa; font-size: 0.95rem; margin: 0;">Fill in your details to create your personalized card.</p>
-</div>
-""", unsafe_allow_html=True)
+st.title("👋 My Profile")
 
-input_col, preview_col = st.columns([1.1, 0.9], gap="large")
+st.write(
+    "Welcome! Fill in the information below to create your profile."
+)
 
-with input_col:
-    with st.container(border=True):
-        name = st.text_input("Name", value="", placeholder="Enter your full name")
-        school = st.text_input("School", value="", placeholder="Enter your school name")
-        favorite_subject = st.text_input("Favorite Subject", value="", placeholder="e.g. Mathematics, Science")
-        hobby = st.text_input("Favorite Hobby", value="", placeholder="e.g. Football, Gaming, Drawing")
+name = st.text_input("👤 What is your name?")
+age = st.number_input(
+    "🎂 How old are you?",
+    min_value=1,
+    max_value=100,
+    step=1
+)
+school = st.text_input("🏫 What school do you go to?")
+favorite_subject = st.text_input("📚 What is your favorite subject?")
+hobby = st.text_input("🎨 What is your favorite hobby?")
 
-with preview_col:
-    st.markdown("<p style='font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#a1a1aa; margin-bottom:10px;'>Card Preview</p>", unsafe_allow_html=True)
-    
-    initials = "".join([part[0].upper() for part in name.split()[:2]]) if name.strip() else "??"
-    
-    with st.container(border=True):
-        col_avatar, col_info = st.columns([1, 3])
-        with col_avatar:
-            st.markdown(f"""
-            <div style="
-                width: 64px; height: 64px; border-radius: 50%;
-                background: linear-gradient(135deg, #3f3f46 0%, #18181b 100%);
-                display: flex; align-items: center; justify-content: center;
-                font-size: 22px; font-weight: 800; color: #ffffff;
-                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
-                border: 2px solid rgba(255, 255, 255, 0.15);
-            ">{initials}</div>
-            """, unsafe_allow_html=True)
-        with col_info:
-            st.markdown(f"### {name if name.strip() else 'Your Name'}")
-            st.caption(f"🏫 **{school if school.strip() else 'School Name'}**")
-        
-        st.divider()
-        
-        stat_col1, stat_col2 = st.columns(2)
-        with stat_col1:
-            st.caption("FAVORITE SUBJECT")
-            st.markdown(f"**{favorite_subject if favorite_subject.strip() else 'Not specified'}**")
-        with stat_col2:
-            st.caption("FAVORITE HOBBY")
-            st.markdown(f"**{hobby if hobby.strip() else 'Not specified'}**")
 
-@st.dialog("Profile Saved")
+@st.dialog("🎉 Profile Created!")
 def show_profile_popup():
-    st.markdown(f"""
-    <div style="text-align: center; padding: 10px 0;">
-        <div style="
-            width: 64px; height: 64px; border-radius: 50%;
-            background: linear-gradient(135deg, #3f3f46 0%, #18181b 100%);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 22px; font-weight: 800; color: #ffffff; margin: 0 auto 12px auto;
-        ">{initials}</div>
-        <h2 style="margin: 0; color: #ffffff;">{name}</h2>
-        <p style="color: #a1a1aa; font-weight: 600; margin-top: 4px;">{school}</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    with st.container(border=True):
-        st.write(f"👤 **Name:** {name}")
-        st.write(f"🏫 **School:** {school}")
-        st.write(f"📚 **Favorite Subject:** {favorite_subject}")
-        st.write(f"🎨 **Favorite Hobby:** {hobby}")
 
-    if st.button("Confirm", use_container_width=True):
+    st.subheader(f"Welcome, {name}! 👋")
+
+    st.write("Here's a little bit about you.")
+
+    st.markdown("---")
+
+    st.write(f"👤 **Name:** {name}")
+    st.write(f"🎂 **Age:** {age} years old")
+    st.write(f"🏫 **School:** {school}")
+    st.write(f"📚 **Favorite Subject:** {favorite_subject}")
+    st.write(f"🎨 **Favorite Hobby:** {hobby}")
+
+    st.markdown("---")
+
+    st.success(
+        f"Welcome to your profile, {name}! 🎓"
+    )
+
+    if st.button("✨ Done", use_container_width=True):
         st.rerun()
 
-st.markdown("<div style='margin-top: 12px;'></div>", unsafe_allow_html=True)
 
-if st.button("✨ Save Profile", use_container_width=True):
-    if name.strip() and school.strip() and favorite_subject.strip() and hobby.strip():
+if st.button(
+    "✨ Create My Profile",
+    use_container_width=True
+):
+
+    if name and school and favorite_subject and hobby:
         show_profile_popup()
     else:
-        st.warning("Please fill out all fields before saving.")
+        st.warning(
+            "Please fill in all the fields first."
+        )
 
-st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
 # ==========================================================
-# 2. SCIENTIFIC CALCULATOR (COMPACT MOBILE GRID)
+
+# Extra vertical space so this section occupies its own screen when scrolling.
+st.markdown('<div style="height: 8vh;"></div>', unsafe_allow_html=True)
+
+# SCIENTIFIC CALCULATOR
 # ==========================================================
 
 st.markdown('<div id="calculator" class="section-anchor"></div>', unsafe_allow_html=True)
 
-st.markdown("""
-<div style="margin-bottom: 20px;">
-    <span class="essentials-badge">COMPUTATIONAL TOOL</span>
-    <h1 class="essentials-gradient-text" style="margin: 4px 0 8px 0; font-size: 2.2rem;">Scientific Calculator</h1>
-    <p style="color: #a1a1aa; font-size: 0.95rem; margin: 0;">Perform basic and advanced mathematical calculations.</p>
-</div>
-""", unsafe_allow_html=True)
+st.markdown("---")
+
+st.title("🧮 Scientific Calculator")
+
+st.write(
+    "A simple scientific calculator with powerful functions."
+)
 
 if "calc_display" not in st.session_state:
     st.session_state.calc_display = ""
@@ -477,53 +462,103 @@ if "calc_display" not in st.session_state:
 if "calc_result" not in st.session_state:
     st.session_state.calc_result = ""
 
+
 def add_to_calculator(value):
     st.session_state.calc_display += value
     st.session_state.calc_result = ""
+
 
 def clear_calculator():
     st.session_state.calc_display = ""
     st.session_state.calc_result = ""
 
+
 def backspace_calculator():
-    st.session_state.calc_display = st.session_state.calc_display[:-1]
+    st.session_state.calc_display = (
+        st.session_state.calc_display[:-1]
+    )
     st.session_state.calc_result = ""
 
+
 def calculate_result():
+
     expression = st.session_state.calc_display
+
     if not expression:
         return
 
     try:
+
         allowed = {
-            "sqrt": math.sqrt, "sin": math.sin, "cos": math.cos,
-            "tan": math.tan, "log": math.log10, "ln": math.log,
-            "pi": math.pi, "e": math.e
+            "sqrt": math.sqrt,
+            "sin": math.sin,
+            "cos": math.cos,
+            "tan": math.tan,
+            "log": math.log10,
+            "ln": math.log,
+            "pi": math.pi,
+            "e": math.e
         }
-        result = eval(expression, {"__builtins__": {}}, allowed)
+
+        result = eval(
+            expression,
+            {"__builtins__": {}},
+            allowed
+        )
 
         if isinstance(result, float):
-            result = str(int(result)) if result.is_integer() else str(round(result, 10))
+
+            if result.is_integer():
+                result = str(int(result))
+            else:
+                result = str(round(result, 10))
+
         else:
             result = str(result)
 
         st.session_state.calc_result = result
-    except ZeroDivisionError:
-        st.session_state.calc_result = "Error: Division by zero"
-    except Exception:
-        st.session_state.calc_result = "Error: Invalid expression"
 
-@st.dialog("Calculation Result")
+    except ZeroDivisionError:
+
+        st.session_state.calc_result = (
+            "Error: Cannot divide by zero"
+        )
+
+    except Exception:
+
+        st.session_state.calc_result = (
+            "Error: Invalid calculation"
+        )
+
+
+@st.dialog("🧮 Calculation Result")
 def show_calculator_result():
-    st.caption("SUBMITTED EXPRESSION")
-    st.code(st.session_state.calc_display, language=None)
-    
+
+    st.subheader("Your calculation")
+
+    st.write("Expression")
+
+    st.code(
+        st.session_state.calc_display,
+        language=None
+    )
+
+    st.markdown("---")
+
+    st.subheader("Result")
+
     st.markdown(
         f"""
         <div style="
-            text-align:center; padding:20px; font-size:32px; font-weight:800;
-            color:#ffffff; background: rgba(39, 39, 42, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; margin: 16px 0;
+            text-align:center;
+            padding:20px;
+            font-size:42px;
+            font-weight:700;
+            color:white;
+            background:rgba(45,45,48,0.8);
+            border-radius:20px;
+            margin:10px 0 25px 0;
+            animation:resultPop 0.5s ease-out;
         ">
             {st.session_state.calc_result}
         </div>
@@ -531,220 +566,979 @@ def show_calculator_result():
         unsafe_allow_html=True
     )
 
-    if st.button("✓ Dismiss", use_container_width=True):
+    if st.button("✓ Done", use_container_width=True):
+
         st.session_state.calc_result = ""
+
         st.rerun()
 
-# Display input screen
+
 st.text_input(
-    "Display",
-    value=st.session_state.calc_display if st.session_state.calc_display else "0",
+    "Calculator Display",
+    value=st.session_state.calc_display,
     disabled=True,
     label_visibility="collapsed"
 )
 
-# Compact 5-column calculator grid
-all_calculator_rows = [
-    [("C", "clear", None), ("⌫", "backspace", None), ("(", "l_paren", "("), (")", "r_paren", ")"), ("÷", "divide", "/")],
-    [("7", "7", "7"), ("8", "8", "8"), ("9", "9", "9"), ("√", "sqrt", "sqrt("), ("×", "multiply", "*")],
-    [("4", "4", "4"), ("5", "5", "5"), ("6", "6", "6"), ("sin", "sin", "sin("), ("-", "minus", "-")],
-    [("1", "1", "1"), ("2", "2", "2"), ("3", "3", "3"), ("cos", "cos", "cos("), ("+", "plus", "+")],
-    [("0", "0", "0"), (".", "decimal", "."), ("π", "pi", "pi"), ("tan", "tan", "tan("), ("=", "equals", None)]
+
+# Calculator buttons
+
+calculator_rows = [
+    [
+        ("7", "seven", "7"),
+        ("8", "eight", "8"),
+        ("9", "nine", "9"),
+        ("÷", "divide", "/")
+    ],
+    [
+        ("4", "four", "4"),
+        ("5", "five", "5"),
+        ("6", "six", "6"),
+        ("×", "multiply", "*")
+    ],
+    [
+        ("1", "one", "1"),
+        ("2", "two", "2"),
+        ("3", "three", "3"),
+        ("-", "minus", "-")
+    ],
+    [
+        ("0", "zero", "0"),
+        (".", "decimal", "."),
+        ("(", "left_parenthesis", "("),
+        ("+", "plus", "+")
+    ],
+    [
+        (")", "right_parenthesis", ")"),
+        ("⌫", "backspace", None),
+        ("C", "clear", None),
+        ("=", "equals", None)
+    ]
 ]
 
-for row in all_calculator_rows:
-    cols = st.columns(5, gap="small")
-    for col, (label, key, value) in zip(cols, row):
-        with col:
+
+for row in calculator_rows:
+
+    columns = st.columns(4)
+
+    for column, button_data in zip(columns, row):
+
+        label, key, value = button_data
+
+        with column:
+
             if key == "backspace":
-                st.button(label, key=f"btn_{key}", use_container_width=True, on_click=backspace_calculator)
+
+                st.button(
+                    label,
+                    key=key,
+                    use_container_width=True,
+                    on_click=backspace_calculator
+                )
+
             elif key == "clear":
-                st.button(label, key=f"btn_{key}", use_container_width=True, on_click=clear_calculator)
+
+                st.button(
+                    label,
+                    key=key,
+                    use_container_width=True,
+                    on_click=clear_calculator
+                )
+
             elif key == "equals":
-                st.button(label, key=f"btn_{key}", use_container_width=True, on_click=calculate_result)
+
+                st.button(
+                    label,
+                    key=key,
+                    use_container_width=True,
+                    on_click=calculate_result
+                )
+
             else:
-                st.button(label, key=f"btn_{key}", use_container_width=True, on_click=add_to_calculator, args=(value,))
+
+                st.button(
+                    label,
+                    key=key,
+                    use_container_width=True,
+                    on_click=add_to_calculator,
+                    args=(value,)
+                )
+
+
+# Scientific functions
+
+st.markdown("---")
+
+st.subheader("🔬 Scientific Functions")
+
+scientific_rows = [
+    [
+        ("√", "sqrt", "sqrt("),
+        ("sin", "sin", "sin("),
+        ("cos", "cos", "cos("),
+        ("tan", "tan", "tan(")
+    ],
+    [
+        ("log", "log", "log("),
+        ("ln", "ln", "ln("),
+        ("π", "pi", "pi"),
+        ("e", "e", "e")
+    ]
+]
+
+
+for row in scientific_rows:
+
+    columns = st.columns(4)
+
+    for column, button_data in zip(columns, row):
+
+        label, key, value = button_data
+
+        with column:
+
+            st.button(
+                label,
+                key=key,
+                use_container_width=True,
+                on_click=add_to_calculator,
+                args=(value,)
+            )
+
 
 if st.session_state.calc_result:
     show_calculator_result()
 
-st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
 # ==========================================================
-# 3. GRADE CALCULATOR
+
+# Extra vertical space so this section occupies its own screen when scrolling.
+st.markdown('<div style="height: 8vh;"></div>', unsafe_allow_html=True)
+
+# GRADE CALCULATOR
 # ==========================================================
 
 st.markdown('<div id="grading" class="section-anchor"></div>', unsafe_allow_html=True)
 
-st.markdown("""
-<div style="margin-bottom: 20px;">
-    <span class="essentials-badge">PERFORMANCE ANALYTICS</span>
-    <h1 class="essentials-gradient-text" style="margin: 4px 0 8px 0; font-size: 2.2rem;">Grade Calculator</h1>
-    <p style="color: #a1a1aa; font-size: 0.95rem; margin: 0;">Calculate overall GPA with weighted scores and attendance tracking.</p>
-</div>
-""", unsafe_allow_html=True)
+st.markdown("---")
+
+st.title("🎓 Grade Calculator")
+
+st.write(
+    "Calculate your GPA using subject scores, "
+    "subject weights, and individual class attendance."
+)
+
 
 if "grade_subjects" not in st.session_state:
-    st.session_state.grade_subjects = ["Mathematics", "Science", "English"]
+
+    st.session_state.grade_subjects = [
+        "Mathematics",
+        "Science",
+        "English"
+    ]
+
 
 if "subject_weights" not in st.session_state:
-    st.session_state.subject_weights = {"Mathematics": 6, "Science": 4, "English": 5}
+
+    st.session_state.subject_weights = {
+        "Mathematics": 6,
+        "Science": 4,
+        "English": 5
+    }
+
 
 def get_letter_grade(score):
-    if score >= 90: return "A"
-    elif score >= 80: return "B"
-    elif score >= 70: return "C"
-    elif score >= 60: return "D"
+
+    if score >= 90:
+        return "A"
+
+    elif score >= 80:
+        return "B"
+
+    elif score >= 70:
+        return "C"
+
+    elif score >= 60:
+        return "D"
+
     return "F"
 
-def get_grade_points(letter):
-    return {"A": 4.0, "B": 3.0, "C": 2.0, "D": 1.0, "F": 0.0}[letter]
 
-st.markdown("<p style='font-size:0.85rem; font-weight:700; color:#e4e4e7; margin-bottom:12px;'>Evaluation Formula: <strong>70% Assessment + 30% Attendance</strong></p>", unsafe_allow_html=True)
+def get_grade_points(letter):
+
+    return {
+        "A": 4.0,
+        "B": 3.0,
+        "C": 2.0,
+        "D": 1.0,
+        "F": 0.0
+    }[letter]
+
+
+st.subheader("📝 Enter Your Scores")
+
+st.write(
+    "Each subject uses **70% score + 30% attendance**."
+)
 
 scores = {}
 weights = {}
 attendance = {}
 
+
 for subject_name in st.session_state.grade_subjects:
+
     with st.container(border=True):
+
         st.subheader(f"📚 {subject_name}")
+
         col1, col2, col3 = st.columns(3)
-        
+
         with col1:
-            scores[subject_name] = st.number_input("Score / 100", min_value=0, max_value=100, value=85, step=1, key=f"grade_score_{subject_name}")
+
+            scores[subject_name] = st.number_input(
+                "Score / 100",
+                min_value=0,
+                max_value=100,
+                value=0,
+                step=1,
+                key=f"grade_score_{subject_name}"
+            )
+
         with col2:
-            attendance[subject_name] = st.number_input("Classes Attended / 10", min_value=0, max_value=10, value=9, step=1, key=f"attendance_{subject_name}")
+
+            attendance[subject_name] = st.number_input(
+                "Classes Attended",
+                min_value=0,
+                max_value=10,
+                value=0,
+                step=1,
+                key=f"attendance_{subject_name}"
+            )
+
         with col3:
-            default_weight = st.session_state.subject_weights.get(subject_name, 1)
-            weights[subject_name] = st.number_input("Subject Weight", min_value=1, max_value=20, value=default_weight, step=1, key=f"weight_{subject_name}")
-            st.session_state.subject_weights[subject_name] = weights[subject_name]
 
-col_add_input, col_add_btn = st.columns([3, 1])
-with col_add_input:
-    new_subject = st.text_input("New Subject Title", placeholder="e.g. History", label_visibility="collapsed")
-with col_add_btn:
-    if st.button("➕ Add Course", use_container_width=True):
-        cleaned = new_subject.strip()
-        if not cleaned:
-            st.warning("Please enter a valid subject title.")
-        elif cleaned in st.session_state.grade_subjects:
-            st.warning("Subject already exists.")
-        else:
-            st.session_state.grade_subjects.append(cleaned)
-            st.session_state.subject_weights[cleaned] = 1
-            st.rerun()
+            default_weight = (
+                st.session_state.subject_weights.get(
+                    subject_name,
+                    1
+                )
+            )
 
-col_calc, col_reset = st.columns(2)
-with col_calc:
-    calculate = st.button("🧮 Compute GPA", use_container_width=True)
-with col_reset:
-    reset = st.button("↻ Reset Assessment", use_container_width=True)
+            weights[subject_name] = st.number_input(
+                "Subject Weight",
+                min_value=1,
+                max_value=20,
+                value=default_weight,
+                step=1,
+                key=f"weight_{subject_name}"
+            )
+
+            st.session_state.subject_weights[
+                subject_name
+            ] = weights[subject_name]
+
+
+# Add subject
+
+st.markdown("---")
+
+st.subheader("➕ Add Another Subject")
+
+col1, col2 = st.columns([3, 1])
+
+with col1:
+
+    new_subject = st.text_input(
+        "Subject name",
+        placeholder="Example: History",
+        label_visibility="collapsed"
+    )
+
+with col2:
+
+    add_subject = st.button(
+        "➕ Add",
+        use_container_width=True
+    )
+
+
+if add_subject:
+
+    cleaned_subject = new_subject.strip()
+
+    if not cleaned_subject:
+
+        st.warning(
+            "Please enter a subject name."
+        )
+
+    elif cleaned_subject in st.session_state.grade_subjects:
+
+        st.warning(
+            "That subject already exists."
+        )
+
+    else:
+
+        st.session_state.grade_subjects.append(
+            cleaned_subject
+        )
+
+        st.session_state.subject_weights[
+            cleaned_subject
+        ] = 1
+
+        st.rerun()
+
+
+# Calculate / Reset
+
+st.markdown("---")
+
+col1, col2 = st.columns(2)
+
+with col1:
+
+    calculate = st.button(
+        "🧮 Calculate GPA",
+        use_container_width=True
+    )
+
+with col2:
+
+    reset = st.button(
+        "↻ Reset Everything",
+        use_container_width=True
+    )
+
+
+# Reset
 
 if reset:
-    st.session_state.grade_subjects = ["Mathematics", "Science", "English"]
-    st.session_state.subject_weights = {"Mathematics": 6, "Science": 4, "English": 5}
-    keys_to_remove = [k for k in list(st.session_state.keys()) if k.startswith("grade_score_") or k.startswith("attendance_") or k.startswith("weight_")]
-    for k in keys_to_remove:
-        del st.session_state[k]
+
+    st.session_state.grade_subjects = [
+        "Mathematics",
+        "Science",
+        "English"
+    ]
+
+    st.session_state.subject_weights = {
+        "Mathematics": 6,
+        "Science": 4,
+        "English": 5
+    }
+
+    keys_to_remove = [
+
+        key
+
+        for key in list(st.session_state.keys())
+
+        if key.startswith("grade_score_")
+        or key.startswith("attendance_")
+        or key.startswith("weight_")
+    ]
+
+    for key in keys_to_remove:
+        del st.session_state[key]
+
     st.rerun()
 
+
+# Calculate GPA
+
 if calculate:
+
     total_weighted_gpa = 0
     total_weights = 0
     results = []
 
     for subject_name in st.session_state.grade_subjects:
+
         score = scores[subject_name]
         classes_attended = attendance[subject_name]
         weight = weights[subject_name]
 
-        att_pct = (classes_attended / 10) * 100
-        final_score = (score * 0.70) + (att_pct * 0.30)
-        letter = get_letter_grade(final_score)
+        attendance_percentage = (
+            classes_attended / 10
+        ) * 100
+
+        subject_contribution = score * 0.70
+
+        attendance_contribution = (
+            attendance_percentage * 0.30
+        )
+
+        final_subject_score = (
+            subject_contribution
+            + attendance_contribution
+        )
+
+        letter = get_letter_grade(
+            final_subject_score
+        )
+
         points = get_grade_points(letter)
 
-        total_weighted_gpa += (points * weight)
+        weighted_gpa = points * weight
+
+        total_weighted_gpa += weighted_gpa
         total_weights += weight
 
         results.append({
-            "subject": subject_name, "score": score, "attended": classes_attended,
-            "att_pct": att_pct, "final_score": final_score, "letter": letter,
-            "points": points, "weight": weight
+            "subject": subject_name,
+            "score": score,
+            "classes_attended": classes_attended,
+            "attendance_percentage":
+                attendance_percentage,
+            "final_score":
+                final_subject_score,
+            "letter": letter,
+            "points": points,
+            "weight": weight
         })
 
-    final_gpa = total_weighted_gpa / total_weights if total_weights > 0 else 0
+    final_gpa = (
+        total_weighted_gpa / total_weights
+    )
 
-    st.markdown("<div style='margin-top: 24px;'></div>", unsafe_allow_html=True)
-    
+    st.markdown("---")
+
     with st.container(border=True):
-        st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
-        st.caption("CUMULATIVE GPA")
-        st.markdown(f"<h1 style='font-size: 3.5rem; margin: 0; color: #ffffff;'>{final_gpa:.2f} <span style='font-size: 1.5rem; color: #71717a;'>/ 4.00</span></h1>", unsafe_allow_html=True)
-        st.markdown(f"<p style='color: #a1a1aa; font-weight: 600;'>{'Academic Distinction' if final_gpa >= 3.5 else 'Satisfactory Standing'}</p>", unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("<p style='font-size:1.1rem; font-weight:700; color:#f4f4f5; margin: 24px 0 12px 0;'>Subject Breakdown</p>", unsafe_allow_html=True)
+        st.subheader("🎓 Your Results")
 
-    for res in results:
-        with st.container(border=True):
-            c1, c2, c3 = st.columns([1.5, 1.5, 1])
-            with c1:
-                st.markdown(f"**📚 {res['subject']}**")
-                st.caption(f"Score: {res['score']}/100 | Attended: {res['attended']}/10")
-            with c2:
-                st.markdown(f"Final Grade: **{res['final_score']:.1f}%**")
-                st.caption(f"Weight: {res['weight']} unit(s)")
-            with c3:
-                st.markdown(f"### **{res['letter']}** ({res['points']:.1f})")
+        st.metric(
+            label="Overall GPA",
+            value=f"{final_gpa:.2f} / 4.00"
+        )
 
-st.markdown("<p style='font-size:1rem; font-weight:700; color:#e4e4e7; margin: 30px 0 12px 0;'>Standard Grading Scale Reference</p>", unsafe_allow_html=True)
-st.table({
-    "Letter Grade": ["A", "B", "C", "D", "F"],
-    "Percentage Range": ["90% – 100%", "80% – 89%", "70% – 79%", "60% – 69%", "0% – 59%"],
-    "Description": ["Outstanding / Excellent", "Above Average / Good", "Satisfactory / Average", "Minimum Passing", "Failing"],
-    "GPA Points": ["4.0", "3.0", "2.0", "1.0", "0.0"]
-})
+    st.subheader("📊 Subject Breakdown")
 
-st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
+    for index, result in enumerate(results):
+
+        subject_name = result["subject"]
+        score = result["score"]
+        classes_attended = result["classes_attended"]
+        attendance_percentage = result["attendance_percentage"]
+        final_score = result["final_score"]
+        letter = result["letter"]
+        points = result["points"]
+        weight = result["weight"]
+
+        with st.container(
+            key=f"result_{index}",
+            border=True
+        ):
+
+            st.subheader(
+                f"📚 {subject_name}"
+            )
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+
+                st.write(
+                    f"📝 Original Score: **{score}/100**"
+                )
+
+                st.write(
+                    f"🏫 Classes Attended: "
+                    f"**{classes_attended}/10**"
+                )
+
+                st.write(
+                    f"📅 Attendance: "
+                    f"**{attendance_percentage:.0f}%**"
+                )
+
+            with col2:
+
+                st.write(
+                    f"🎯 Final Score: "
+                    f"**{final_score:.2f}%**"
+                )
+
+                st.write(
+                    f"⚖️ Subject Weight: **{weight}**"
+                )
+
+                st.write(
+                    f"🎓 GPA Points: **{points:.1f}**"
+                )
+
+            st.write(
+                f"### Grade: **{letter}**"
+            )
+
+    st.subheader(
+        "🧮 How Your Grade Is Calculated"
+    )
+
+    with st.container(border=True):
+
+        st.write(
+            "📝 **Subject Score = 70%**"
+        )
+
+        st.write(
+            "🏫 **Attendance = 30%**"
+        )
+
+        st.write(
+            "🎯 **Final Subject Score = "
+            "(Score × 70%) + (Attendance × 30%)**"
+        )
+
+    st.subheader("🏫 Attendance Summary")
+
+    for result in results:
+
+        st.write(
+            f"**{result['subject']}:** "
+            f"{result['classes_attended']}/10 classes "
+            f"({result['attendance_percentage']:.0f}%)"
+        )
+
+    if final_gpa >= 3.5:
+
+        st.success(
+            "🏆 Outstanding! You are doing an excellent job!"
+        )
+
+    elif final_gpa >= 3.0:
+
+        st.success(
+            "🌟 Great work! Keep pushing yourself!"
+        )
+
+    elif final_gpa >= 2.0:
+
+        st.info(
+            "👍 Good effort! Keep working to improve your grades."
+        )
+
+    elif final_gpa >= 1.0:
+
+        st.warning(
+            "📖 Keep studying and don't give up!"
+        )
+
+    else:
+
+        st.error(
+            "💪 Don't give up! There is always room to improve."
+        )
+
 
 # ==========================================================
-# 4. QUIZ MASTER
+# GRADING SCALE
+# ==========================================================
+
+st.markdown("---")
+
+st.subheader("📚 Grading Scale")
+
+st.table({
+
+    "Letter Grade": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "F"
+    ],
+
+    "Percentage Range": [
+        "90% – 100%",
+        "80% – 89%",
+        "70% – 79%",
+        "60% – 69%",
+        "0% – 59%"
+    ],
+
+    "Description": [
+        "Outstanding / Excellent",
+        "Above Average / Good",
+        "Satisfactory / Average",
+        "Minimum Passing",
+        "Failing"
+    ],
+
+    "GPA Points": [
+        "4.0",
+        "3.0",
+        "2.0",
+        "1.0",
+        "0.0"
+    ]
+})
+
+
+# ==========================================================
+
+# Extra vertical space so this section occupies its own screen when scrolling.
+st.markdown('<div style="height: 8vh;"></div>', unsafe_allow_html=True)
+
+# QUIZ MASTER
 # ==========================================================
 
 st.markdown('<div id="quiz-maker" class="section-anchor"></div>', unsafe_allow_html=True)
 
-st.markdown("""
-<div style="margin-bottom: 20px;">
-    <span class="essentials-badge">KNOWLEDGE ASSESSMENT</span>
-    <h1 class="essentials-gradient-text" style="margin: 4px 0 8px 0; font-size: 2.2rem;">Quiz Master</h1>
-    <p style="color: #a1a1aa; font-size: 0.95rem; margin: 0;">Construct and take customized multiple-choice evaluations.</p>
-</div>
-""", unsafe_allow_html=True)
+st.markdown("---")
+
+st.title("🧠 Quiz Master")
+
+st.write(
+    "Create your own quiz with as many questions as you want."
+)
+
+
+# ==========================================================
+# QUIZ STATE
+# ==========================================================
 
 if "quiz_questions" not in st.session_state:
+
     st.session_state.quiz_questions = []
 
-if st.button("➕ Add New Question Item", use_container_width=True):
+
+if "quiz_started" not in st.session_state:
+
+    st.session_state.quiz_started = False
+
+
+if "quiz_finished" not in st.session_state:
+
+    st.session_state.quiz_finished = False
+
+
+if "quiz_answers" not in st.session_state:
+
+    st.session_state.quiz_answers = {}
+
+
+# ==========================================================
+# ADD QUESTION
+# ==========================================================
+
+st.subheader("✏️ Build Your Quiz")
+
+if st.button(
+    "➕ Add Question",
+    use_container_width=True
+):
+
     st.session_state.quiz_questions.append({
-        "question": "", "A": "", "B": "", "C": "", "D": "", "correct": "A"
+
+        "question": "",
+
+        "A": "",
+
+        "B": "",
+
+        "C": "",
+
+        "D": "",
+
+        "correct": "A"
+
     })
+
     st.rerun()
 
-if st.session_state.quiz_questions:
-    for idx, q in enumerate(st.session_state.quiz_questions):
+
+# ==========================================================
+# QUESTION BUILDER
+# ==========================================================
+
+for i, question in enumerate(
+    st.session_state.quiz_questions
+):
+
+    with st.container(border=True):
+
+        st.subheader(
+            f"Question {i + 1}"
+        )
+
+        question["question"] = st.text_input(
+            "❓ Question",
+            value=question["question"],
+            placeholder="Enter your question...",
+            key=f"quiz_question_{i}"
+        )
+
+        st.write("### 🔤 Choices")
+
+        question["A"] = st.text_input(
+            "Choice A",
+            value=question["A"],
+            placeholder="Enter choice A",
+            key=f"quiz_choice_a_{i}"
+        )
+
+        question["B"] = st.text_input(
+            "Choice B",
+            value=question["B"],
+            placeholder="Enter choice B",
+            key=f"quiz_choice_b_{i}"
+        )
+
+        question["C"] = st.text_input(
+            "Choice C",
+            value=question["C"],
+            placeholder="Enter choice C",
+            key=f"quiz_choice_c_{i}"
+        )
+
+        question["D"] = st.text_input(
+            "Choice D",
+            value=question["D"],
+            placeholder="Enter choice D",
+            key=f"quiz_choice_d_{i}"
+        )
+
+        question["correct"] = st.selectbox(
+            "✅ Which option is correct?",
+            ["A", "B", "C", "D"],
+            index=["A", "B", "C", "D"].index(
+                question["correct"]
+            ),
+            key=f"quiz_correct_{i}"
+        )
+
+        if st.button(
+            "🗑️ Remove Question",
+            key=f"remove_quiz_question_{i}",
+            use_container_width=True
+        ):
+
+            st.session_state.quiz_questions.pop(i)
+
+            st.rerun()
+
+
+# ==========================================================
+# QUIZ CONTROLS
+# ==========================================================
+
+if len(st.session_state.quiz_questions) > 0:
+
+    st.markdown("---")
+
+    st.write(
+        f"📋 **{len(st.session_state.quiz_questions)} "
+        f"question(s) created**"
+    )
+
+    quiz_ready = True
+
+    for question in st.session_state.quiz_questions:
+
+        if not question["question"].strip():
+            quiz_ready = False
+
+        if not question["A"].strip():
+            quiz_ready = False
+
+        if not question["B"].strip():
+            quiz_ready = False
+
+        if not question["C"].strip():
+            quiz_ready = False
+
+        if not question["D"].strip():
+            quiz_ready = False
+
+
+    if not quiz_ready:
+
+        st.warning(
+            "Please fill in the question and all four choices."
+        )
+
+
+    if st.button(
+        "▶️ Start Quiz",
+        use_container_width=True,
+        disabled=not quiz_ready
+    ):
+
+        st.session_state.quiz_started = True
+        st.session_state.quiz_finished = False
+        st.session_state.quiz_answers = {}
+
+        st.rerun()
+
+
+# ==========================================================
+# TAKE QUIZ
+# ==========================================================
+
+if (
+    st.session_state.quiz_started
+    and len(st.session_state.quiz_questions) > 0
+):
+
+    st.markdown("---")
+
+    st.title("📝 Take the Quiz")
+
+    st.write(
+        "Choose one answer for every question."
+    )
+
+
+    for i, question in enumerate(
+        st.session_state.quiz_questions
+    ):
+
         with st.container(border=True):
-            st.caption(f"QUESTION {idx + 1}")
-            q["question"] = st.text_input(f"Question Title #{idx + 1}", value=q["question"], key=f"q_title_{idx}")
-            
-            c1, c2 = st.columns(2)
-            with c1:
-                q["A"] = st.text_input(f"Option A", value=q["A"], key=f"q_a_{idx}")
-                q["B"] = st.text_input(f"Option B", value=q["B"], key=f"q_b_{idx}")
-            with c2:
-                q["C"] = st.text_input(f"Option C", value=q["C"], key=f"q_c_{idx}")
-                q["D"] = st.text_input(f"Option D", value=q["D"], key=f"q_d_{idx}")
-                
-            q["correct"] = st.selectbox(f"Correct Answer Key", ["A", "B", "C", "D"], index=["A", "B", "C", "D"].index(q["correct"]), key=f"q_corr_{idx}")
-else:
-    st.info("No assessment questions configured yet. Click the button above to add your first question.")
+
+            st.subheader(
+                f"{i + 1}. {question['question']}"
+            )
+
+            choices = [
+                f"A. {question['A']}",
+                f"B. {question['B']}",
+                f"C. {question['C']}",
+                f"D. {question['D']}"
+            ]
+
+            selected = st.radio(
+                "Choose your answer:",
+                choices,
+                key=f"quiz_answer_{i}"
+            )
+
+            st.session_state.quiz_answers[i] = (
+                selected[0]
+            )
+
+
+    # ======================================================
+    # SUBMIT QUIZ
+    # ======================================================
+
+    if st.button(
+        "🎯 Submit Quiz",
+        use_container_width=True
+    ):
+
+        score = 0
+
+        for i, question in enumerate(
+            st.session_state.quiz_questions
+        ):
+
+            user_answer = (
+                st.session_state.quiz_answers.get(i)
+            )
+
+            if user_answer == question["correct"]:
+
+                score += 1
+
+
+        total = len(
+            st.session_state.quiz_questions
+        )
+
+        percentage = (
+            score / total
+        ) * 100
+
+        st.session_state.quiz_score = score
+        st.session_state.quiz_total = total
+        st.session_state.quiz_percentage = percentage
+        st.session_state.quiz_finished = True
+        st.session_state.quiz_started = False
+
+        st.rerun()
+
+
+# ==========================================================
+# QUIZ RESULT POPUP
+# ==========================================================
+
+# ==========================================================
+# QUIZ RESULT
+# ==========================================================
+
+if st.session_state.quiz_finished:
+
+    @st.dialog("🎉 Quiz Complete!")
+    def show_quiz_result():
+
+        score = st.session_state.quiz_score
+        total = st.session_state.quiz_total
+        percentage = st.session_state.quiz_percentage
+
+        st.subheader("Your Quiz Results")
+
+        st.write("")
+
+        # Score
+        st.metric(
+            "🏆 Score",
+            f"{score} / {total}"
+        )
+
+        # Percentage
+        st.metric(
+            "📊 Percentage",
+            f"{percentage:.0f}%"
+        )
+
+        st.markdown("---")
+
+        # Message based on score
+        if percentage == 100:
+
+            st.success(
+                "🏆 Perfect score! You got every question correct!"
+            )
+
+        elif percentage >= 80:
+
+            st.success(
+                "🌟 Excellent work! You really know your stuff!"
+            )
+
+        elif percentage >= 60:
+
+            st.info(
+                "👍 Good job! Keep practicing!"
+            )
+
+        elif percentage >= 40:
+
+            st.warning(
+                "📚 Not bad! Keep studying and try again!"
+            )
+
+        else:
+
+            st.error(
+                "💪 Keep practicing! You can do better next time!"
+            )
+
+        st.markdown("---")
+
+        if st.button(
+            "✓ Done",
+            use_container_width=True
+        ):
+
+            st.session_state.quiz_finished = False
+            st.session_state.quiz_answers = {}
+
+            st.rerun()
+
+    show_quiz_result()
+
