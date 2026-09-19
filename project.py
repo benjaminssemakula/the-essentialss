@@ -4,7 +4,7 @@ import base64
 import math
 
 # ==========================================================
-# PAGE SETTINGS
+# PAGE CONFIGURATION
 # ==========================================================
 
 st.set_page_config(
@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # ==========================================================
-# CUSTOM LIVE VIDEO BACKGROUND & CANVAS RESET
+# BACKGROUND VIDEO INJECTOR
 # ==========================================================
 
 video_path = os.path.join(
@@ -30,13 +30,13 @@ if os.path.exists(video_path):
 st.markdown(
     f"""
     <style>
-    /* Global Canvas Reset */
+    /* App Canvas Background Reset */
     .stApp {{
         background: #0b0c10 !important;
         color: #f1f5f9;
     }}
 
-    /* Fixed Background Video */
+    /* Video Background Container */
     .custom-background {{
         position: fixed;
         top: 0;
@@ -45,57 +45,67 @@ st.markdown(
         height: 100vh;
         z-index: -10;
         overflow: hidden;
+        pointer-events: none;
     }}
 
     .custom-background video {{
-        width: 100%;
-        height: 100%;
+        width: 100vw;
+        height: 100vh;
         object-fit: cover;
-        filter: brightness(0.5) contrast(1.1);
+        filter: brightness(0.45) contrast(1.1);
     }}
 
-    /* Frosted Gradient Overlay */
+    /* Frosted Blur Overlay */
     .background-overlay {{
         position: fixed;
         top: 0;
         left: 0;
         width: 100vw;
         height: 100vh;
-        background: radial-gradient(circle at 50% 20%, rgba(15, 23, 42, 0.5) 0%, rgba(2, 6, 23, 0.9) 100%);
+        background: radial-gradient(circle at 50% 20%, rgba(15, 23, 42, 0.55) 0%, rgba(2, 6, 23, 0.92) 100%);
         z-index: -9;
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        pointer-events: none;
     }}
     </style>
 
-    {"<div class='custom-background'><video autoplay muted loop playsinline><source src='data:video/mp4;base64," + video_base64 + "' type='video/mp4'></video></div>" if video_base64 else ""}
+    {"<div class='custom-background'><video autoplay loop muted playsinline><source src='data:video/mp4;base64," + video_base64 + "' type='video/mp4'></video></div>" if video_base64 else ""}
     <div class="background-overlay"></div>
     """,
     unsafe_allow_html=True
 )
 
 # ==========================================================
-# EXECUTIVE DESIGN SYSTEM & STYLING
+# EXECUTIVE DESIGN SYSTEM (CSS & NAVIGATION SCRIPT)
 # ==========================================================
 
 st.markdown("""
 <style>
-/* Layout Constraints */
+/* Smooth Scroll Enabling */
+html {
+    scroll-behavior: smooth !important;
+}
+
+/* Page Layout Constraints */
 .block-container {
     width: min(92vw, 1200px) !important;
     max-width: 1200px !important;
     margin: 0 auto !important;
-    padding-top: 24px !important;
+    padding-top: 20px !important;
     padding-bottom: 80px !important;
 }
 
 html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
     overflow-x: hidden !important;
-    scroll-behavior: smooth !important;
-    scroll-padding-top: 100px !important;
 }
 
-/* Typography Hierarchy */
+/* Section Anchors Offset */
+.section-anchor {
+    scroll-margin-top: 100px;
+}
+
+/* Typography Styling */
 h1, h2, h3, h4 {
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif !important;
     letter-spacing: -0.025em !important;
@@ -108,12 +118,10 @@ h1, h2, h3, h4 {
     font-weight: 800;
 }
 
-/* Micro-Badges */
 .corporate-badge {
-    display: inline-flex;
-    align-items: center;
-    background: rgba(56, 189, 248, 0.1);
-    border: 1px solid rgba(56, 189, 248, 0.25);
+    display: inline-block;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.3);
     border-radius: 8px;
     padding: 4px 10px;
     font-size: 11px;
@@ -124,19 +132,19 @@ h1, h2, h3, h4 {
     text-transform: uppercase;
 }
 
-/* Executive Navigation Bar */
+/* Sticky Executive Navigation Bar */
 .navigation-bar {
     position: sticky;
     top: 15px;
-    z-index: 999;
-    background: rgba(15, 23, 42, 0.75);
+    z-index: 9999;
+    background: rgba(15, 23, 42, 0.85);
     backdrop-filter: blur(25px);
     -webkit-backdrop-filter: blur(25px);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 20px;
     padding: 10px 14px;
-    margin-bottom: 36px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    margin-bottom: 32px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
 }
 
 .navigation-title {
@@ -164,61 +172,31 @@ h1, h2, h3, h4 {
 }
 
 .navigation-link:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
     transform: translateY(-2px);
     color: #ffffff !important;
 }
 
-/* Custom Executive Cards */
-.profile-card {
-    background: rgba(15, 23, 42, 0.65);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 24px;
-    padding: 28px;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.35);
-    transition: transform 0.3s ease, border-color 0.3s ease;
+/* Container Glassmorphism Overrides */
+[data-testid="stVerticalBlockBorderWrapper"] {
+    background: rgba(15, 23, 42, 0.65) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    border-radius: 20px !important;
+    padding: 16px !important;
+    margin-bottom: 16px !important;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
 }
 
-.profile-card:hover {
-    border-color: rgba(255, 255, 255, 0.22);
-}
-
-.avatar-container {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    font-weight: 800;
-    color: #ffffff;
-    box-shadow: 0 10px 20px rgba(2, 132, 199, 0.3);
-    border: 2px solid rgba(255, 255, 255, 0.25);
-}
-
-/* Streamlit Input Modernization */
-.stTextInput label, .stNumberInput label, .stSelectbox label {
-    font-size: 0.8rem !important;
-    font-weight: 700 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.05em !important;
-    color: #94a3b8 !important;
-    margin-bottom: 6px !important;
-}
-
-.stTextInput input, .stNumberInput input {
+/* Custom Input Field Styling */
+.stTextInput input, .stNumberInput input, .stSelectbox select {
     background: rgba(15, 23, 42, 0.7) !important;
     color: #ffffff !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    border-radius: 14px !important;
-    padding: 12px 16px !important;
-    font-size: 15px !important;
-    transition: all 0.2s ease !important;
+    border-radius: 12px !important;
+    padding: 10px 14px !important;
 }
 
 .stTextInput input:focus, .stNumberInput input:focus {
@@ -226,15 +204,14 @@ h1, h2, h3, h4 {
     box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2) !important;
 }
 
-/* Streamlit Button Modernization */
+/* Custom Button Styling */
 .stButton > button {
     background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 100%) !important;
     color: #ffffff !important;
     border: 1px solid rgba(255, 255, 255, 0.16) !important;
-    border-radius: 14px !important;
-    min-height: 48px !important;
+    border-radius: 12px !important;
+    min-height: 46px !important;
     font-weight: 600 !important;
-    letter-spacing: 0.01em !important;
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
@@ -242,24 +219,10 @@ h1, h2, h3, h4 {
     background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 100%) !important;
     border-color: rgba(255, 255, 255, 0.35) !important;
     transform: translateY(-2px) !important;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.4) !important;
 }
 
-/* Container Border Overrides for Native Containers */
-[data-testid="stVerticalBlockBorderWrapper"] {
-    background: rgba(15, 23, 42, 0.65) !important;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.12) !important;
-    border-radius: 20px !important;
-    padding: 12px !important;
-    margin-bottom: 16px !important;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-}
-
-/* Tables & Grading Scale */
+/* Table Modernization */
 div[data-testid="stTable"] table {
-    font-size: 15px !important;
     background: rgba(15, 23, 42, 0.75) !important;
     border-radius: 16px !important;
     overflow: hidden !important;
@@ -269,78 +232,37 @@ div[data-testid="stTable"] table {
 div[data-testid="stTable"] th {
     color: #f8fafc !important;
     background: rgba(30, 41, 59, 0.9) !important;
-    font-size: 13px !important;
-    font-weight: 700 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.05em !important;
-    padding: 14px 16px !important;
 }
 
-div[data-testid="stTable"] td {
-    color: #cbd5e1 !important;
-    padding: 12px 16px !important;
-    border-bottom: 1px solid rgba(255,255,255,0.06) !important;
-}
-
-/* Modal Dialog Modernization */
+/* Modal Dialog Styling */
 [data-testid="stDialog"] > div {
     background: rgba(15, 23, 42, 0.96) !important;
     border: 1px solid rgba(255, 255, 255, 0.18) !important;
-    border-radius: 26px !important;
-    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8) !important;
+    border-radius: 24px !important;
 }
 
-/* Section Anchors & Spacers */
-.section-anchor {
-    scroll-margin-top: 110px;
-}
-
+/* Section Divider */
 .section-divider {
     border: none;
     border-top: 1px solid rgba(255,255,255,0.1);
     margin: 40px 0;
 }
 
-/* Mobile Responsiveness */
+/* Responsive Overrides */
 @media (max-width: 768px) {
     .block-container {
-        padding-left: 12px !important;
-        padding-right: 12px !important;
+        padding-left: 10px !important;
+        padding-right: 10px !important;
     }
-
-    .profile-card {
-        padding: 20px;
-    }
-
-    .navigation-bar {
-        padding: 6px;
-    }
-
     .navigation-link {
         font-size: 11px;
         padding: 8px 2px;
-    }
-
-    .stHorizontalBlock:has(.stButton) {
-        flex-wrap: nowrap !important;
-        gap: 6px !important;
-    }
-
-    .stHorizontalBlock:has(.stButton) > div {
-        min-width: 0 !important;
-        flex: 1 1 0 !important;
-    }
-
-    .stButton > button {
-        min-height: 42px !important;
-        font-size: 0.88rem !important;
-        padding: 6px 2px !important;
     }
 }
 </style>
 """, unsafe_allow_html=True)
 
-# Hide default Streamlit chrome
+# Hide Streamlit UI Chrome
 st.markdown("""
 <style>
 #MainMenu { visibility: hidden; }
@@ -372,7 +294,7 @@ st.markdown("""
 st.markdown('<div id="profile" class="section-anchor"></div>', unsafe_allow_html=True)
 
 st.markdown("""
-<div style="margin-bottom: 24px;">
+<div style="margin-bottom: 20px;">
     <span class="corporate-badge">ACCOUNT OVERVIEW</span>
     <h1 class="corporate-gradient-text" style="margin: 4px 0 8px 0; font-size: 2.2rem;">Executive Profile</h1>
     <p style="color: #94a3b8; font-size: 0.95rem; margin: 0;">Configure your academic identity and personal credentials.</p>
@@ -382,7 +304,7 @@ st.markdown("""
 input_col, preview_col = st.columns([1.1, 0.9], gap="large")
 
 with input_col:
-    with st.container():
+    with st.container(border=True):
         name = st.text_input("Full Name", value="Alex Mercer", placeholder="e.g. John Doe")
         
         col_age, col_school = st.columns([1, 2])
@@ -399,57 +321,64 @@ with preview_col:
     
     initials = "".join([part[0].upper() for part in name.split()[:2]]) if name.strip() else "EX"
     
-    st.markdown(f"""
-    <div class="profile-card">
-        <div style="display: flex; align-items: center; gap: 18px; margin-bottom: 24px;">
-            <div class="avatar-container">{initials}</div>
-            <div>
-                <h3 style="margin: 0; font-size: 1.3rem; color: #ffffff;">{name if name else "Your Name"}</h3>
-                <p style="margin: 2px 0 0 0; color: #38bdf8; font-size: 0.88rem; font-weight: 600;">{school if school else "Institution Name"}</p>
-            </div>
-        </div>
+    # Native Streamlit container cleanly holds layout without raw HTML code leaks
+    with st.container(border=True):
+        col_avatar, col_info = st.columns([1, 3])
+        with col_avatar:
+            st.markdown(f"""
+            <div style="
+                width: 64px; height: 64px; border-radius: 50%;
+                background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+                display: flex; align-items: center; justify-content: center;
+                font-size: 24px; font-weight: 800; color: #ffffff;
+                box-shadow: 0 10px 20px rgba(2, 132, 199, 0.3);
+                border: 2px solid rgba(255, 255, 255, 0.25);
+            ">{initials}</div>
+            """, unsafe_allow_html=True)
+        with col_info:
+            st.markdown(f"### {name if name else 'Your Name'}")
+            st.caption(f"🏫 **{school if school else 'Institution Name'}**")
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 18px;">
-            <div>
-                <span style="font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 700;">Age Record</span>
-                <p style="margin: 4px 0 0 0; font-weight: 600; color: #e2e8f0;">{age} yrs old</p>
-            </div>
-            <div>
-                <span style="font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 700;">Focus Area</span>
-                <p style="margin: 4px 0 0 0; font-weight: 600; color: #e2e8f0;">{favorite_subject if favorite_subject else "N/A"}</p>
-            </div>
-        </div>
+        st.divider()
         
-        <div style="margin-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px;">
-            <span style="font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 700;">Secondary Interest</span>
-            <p style="margin: 4px 0 0 0; font-weight: 600; color: #e2e8f0;">{hobby if hobby else "N/A"}</p>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
+        stat_col1, stat_col2 = st.columns(2)
+        with stat_col1:
+            st.caption("AGE RECORD")
+            st.markdown(f"**{age} yrs old**")
+        with stat_col2:
+            st.caption("FOCUS AREA")
+            st.markdown(f"**{favorite_subject if favorite_subject else 'N/A'}**")
+            
+        st.divider()
+        st.caption("SECONDARY INTEREST")
+        st.markdown(f"**{hobby if hobby else 'N/A'}**")
 
 @st.dialog("Credentials Finalized")
 def show_profile_popup():
     st.markdown(f"""
     <div style="text-align: center; padding: 10px 0;">
-        <div class="avatar-container" style="margin: 0 auto 16px auto;">{initials}</div>
+        <div style="
+            width: 64px; height: 64px; border-radius: 50%;
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; font-weight: 800; color: #ffffff; margin: 0 auto 12px auto;
+        ">{initials}</div>
         <h2 style="margin: 0; color: #ffffff;">{name}</h2>
         <p style="color: #38bdf8; font-weight: 600; margin-top: 4px;">{school}</p>
     </div>
-    <div style="background: rgba(255,255,255,0.03); border-radius: 16px; padding: 16px; border: 1px solid rgba(255,255,255,0.08); margin: 20px 0;">
-        <p style="margin: 6px 0; color: #cbd5e1;">👤 <strong>Name:</strong> {name}</p>
-        <p style="margin: 6px 0; color: #cbd5e1;">🎂 <strong>Age:</strong> {age} years old</p>
-        <p style="margin: 6px 0; color: #cbd5e1;">🏫 <strong>Institution:</strong> {school}</p>
-        <p style="margin: 6px 0; color: #cbd5e1;">📚 <strong>Primary Focus:</strong> {favorite_subject}</p>
-        <p style="margin: 6px 0; color: #cbd5e1;">🎨 <strong>Interest:</strong> {hobby}</p>
-    </div>
     """, unsafe_allow_html=True)
+    
+    with st.container(border=True):
+        st.write(f"👤 **Name:** {name}")
+        st.write(f"🎂 **Age:** {age} years old")
+        st.write(f"🏫 **Institution:** {school}")
+        st.write(f"📚 **Primary Focus:** {favorite_subject}")
+        st.write(f"🎨 **Interest:** {hobby}")
 
     if st.button("Confirm Record", use_container_width=True):
         st.rerun()
 
-
-st.markdown("<div style='margin-top: 16px;'></div>", unsafe_allow_html=True)
+st.markdown("<div style='margin-top: 12px;'></div>", unsafe_allow_html=True)
 
 if st.button("✨ Save Profile Record", use_container_width=True):
     if name and school and favorite_subject and hobby:
@@ -466,7 +395,7 @@ st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 st.markdown('<div id="calculator" class="section-anchor"></div>', unsafe_allow_html=True)
 
 st.markdown("""
-<div style="margin-bottom: 24px;">
+<div style="margin-bottom: 20px;">
     <span class="corporate-badge">COMPUTATIONAL TOOL</span>
     <h1 class="corporate-gradient-text" style="margin: 4px 0 8px 0; font-size: 2.2rem;">Scientific Calculator</h1>
     <p style="color: #94a3b8; font-size: 0.95rem; margin: 0;">Perform basic and advanced mathematical calculations.</p>
@@ -479,21 +408,17 @@ if "calc_display" not in st.session_state:
 if "calc_result" not in st.session_state:
     st.session_state.calc_result = ""
 
-
 def add_to_calculator(value):
     st.session_state.calc_display += value
     st.session_state.calc_result = ""
-
 
 def clear_calculator():
     st.session_state.calc_display = ""
     st.session_state.calc_result = ""
 
-
 def backspace_calculator():
     st.session_state.calc_display = st.session_state.calc_display[:-1]
     st.session_state.calc_result = ""
-
 
 def calculate_result():
     expression = st.session_state.calc_display
@@ -502,50 +427,34 @@ def calculate_result():
 
     try:
         allowed = {
-            "sqrt": math.sqrt,
-            "sin": math.sin,
-            "cos": math.cos,
-            "tan": math.tan,
-            "log": math.log10,
-            "ln": math.log,
-            "pi": math.pi,
-            "e": math.e
+            "sqrt": math.sqrt, "sin": math.sin, "cos": math.cos,
+            "tan": math.tan, "log": math.log10, "ln": math.log,
+            "pi": math.pi, "e": math.e
         }
         result = eval(expression, {"__builtins__": {}}, allowed)
 
         if isinstance(result, float):
-            if result.is_integer():
-                result = str(int(result))
-            else:
-                result = str(round(result, 10))
+            result = str(int(result)) if result.is_integer() else str(round(result, 10))
         else:
             result = str(result)
 
         st.session_state.calc_result = result
     except ZeroDivisionError:
-        st.session_state.calc_result = "Error: Cannot divide by zero"
+        st.session_state.calc_result = "Error: Division by zero"
     except Exception:
         st.session_state.calc_result = "Error: Invalid expression"
 
-
 @st.dialog("Calculation Output")
 def show_calculator_result():
-    st.markdown("<p style='font-size:12px; color:#94a3b8; text-transform:uppercase; font-weight:700;'>Submitted Expression</p>", unsafe_allow_html=True)
+    st.caption("SUBMITTED EXPRESSION")
     st.code(st.session_state.calc_display, language=None)
     
     st.markdown(
         f"""
         <div style="
-            text-align:center;
-            padding:24px;
-            font-size:36px;
-            font-weight:800;
-            color:#ffffff;
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid rgba(56, 189, 248, 0.3);
-            border-radius: 20px;
-            margin: 16px 0 24px 0;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align:center; padding:20px; font-size:32px; font-weight:800;
+            color:#ffffff; background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 16px; margin: 16px 0;
         ">
             {st.session_state.calc_result}
         </div>
@@ -556,7 +465,6 @@ def show_calculator_result():
     if st.button("✓ Dismiss", use_container_width=True):
         st.session_state.calc_result = ""
         st.rerun()
-
 
 calc_col, sci_col = st.columns([1.2, 0.8], gap="large")
 
@@ -569,11 +477,11 @@ with calc_col:
     )
 
     calculator_rows = [
-        [("7", "seven", "7"), ("8", "eight", "8"), ("9", "nine", "9"), ("÷", "divide", "/")],
-        [("4", "four", "4"), ("5", "five", "5"), ("6", "six", "6"), ("×", "multiply", "*")],
-        [("1", "one", "1"), ("2", "two", "2"), ("3", "three", "3"), ("-", "minus", "-")],
-        [("0", "zero", "0"), (".", "decimal", "."), ("(", "left_parenthesis", "("), ("+", "plus", "+")],
-        [(")", "right_parenthesis", ")"), ("⌫", "backspace", None), ("C", "clear", None), ("=", "equals", None)]
+        [("7", "7", "7"), ("8", "8", "8"), ("9", "9", "9"), ("÷", "divide", "/")],
+        [("4", "4", "4"), ("5", "5", "5"), ("6", "6", "6"), ("×", "multiply", "*")],
+        [("1", "1", "1"), ("2", "2", "2"), ("3", "3", "3"), ("-", "minus", "-")],
+        [("0", "0", "0"), (".", "decimal", "."), ("(", "l_paren", "("), ("+", "plus", "+")],
+        [(")", "r_paren", ")"), ("⌫", "backspace", None), ("C", "clear", None), ("=", "equals", None)]
     ]
 
     for row in calculator_rows:
@@ -582,13 +490,13 @@ with calc_col:
             label, key, value = button_data
             with column:
                 if key == "backspace":
-                    st.button(label, key=key, use_container_width=True, on_click=backspace_calculator)
+                    st.button(label, key=f"btn_{key}", use_container_width=True, on_click=backspace_calculator)
                 elif key == "clear":
-                    st.button(label, key=key, use_container_width=True, on_click=clear_calculator)
+                    st.button(label, key=f"btn_{key}", use_container_width=True, on_click=clear_calculator)
                 elif key == "equals":
-                    st.button(label, key=key, use_container_width=True, on_click=calculate_result)
+                    st.button(label, key=f"btn_{key}", use_container_width=True, on_click=calculate_result)
                 else:
-                    st.button(label, key=key, use_container_width=True, on_click=add_to_calculator, args=(value,))
+                    st.button(label, key=f"btn_{key}", use_container_width=True, on_click=add_to_calculator, args=(value,))
 
 with sci_col:
     st.markdown("<p style='font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#94a3b8; margin-bottom:10px;'>Scientific Functions</p>", unsafe_allow_html=True)
@@ -605,7 +513,7 @@ with sci_col:
         for column, button_data in zip(columns, row):
             label, key, value = button_data
             with column:
-                st.button(label, key=key, use_container_width=True, on_click=add_to_calculator, args=(value,))
+                st.button(label, key=f"btn_sci_{key}", use_container_width=True, on_click=add_to_calculator, args=(value,))
 
 if st.session_state.calc_result:
     show_calculator_result()
@@ -619,7 +527,7 @@ st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 st.markdown('<div id="grading" class="section-anchor"></div>', unsafe_allow_html=True)
 
 st.markdown("""
-<div style="margin-bottom: 24px;">
+<div style="margin-bottom: 20px;">
     <span class="corporate-badge">PERFORMANCE ANALYTICS</span>
     <h1 class="corporate-gradient-text" style="margin: 4px 0 8px 0; font-size: 2.2rem;">Grade Calculator</h1>
     <p style="color: #94a3b8; font-size: 0.95rem; margin: 0;">Calculate overall GPA with weighted scores and attendance tracking.</p>
@@ -632,7 +540,6 @@ if "grade_subjects" not in st.session_state:
 if "subject_weights" not in st.session_state:
     st.session_state.subject_weights = {"Mathematics": 6, "Science": 4, "English": 5}
 
-
 def get_letter_grade(score):
     if score >= 90: return "A"
     elif score >= 80: return "B"
@@ -640,10 +547,8 @@ def get_letter_grade(score):
     elif score >= 60: return "D"
     return "F"
 
-
 def get_grade_points(letter):
     return {"A": 4.0, "B": 3.0, "C": 2.0, "D": 1.0, "F": 0.0}[letter]
-
 
 st.markdown("<p style='font-size:0.85rem; font-weight:700; color:#cbd5e1; margin-bottom:12px;'>Evaluation Formula: <strong>70% Assessment + 30% Attendance</strong></p>", unsafe_allow_html=True)
 
@@ -652,8 +557,8 @@ weights = {}
 attendance = {}
 
 for subject_name in st.session_state.grade_subjects:
-    with st.container():
-        st.markdown(f"<h4 style='margin:0 0 12px 0; font-size:1.1rem; color:#f8fafc;'>📚 {subject_name}</h4>", unsafe_allow_html=True)
+    with st.container(border=True):
+        st.subheader(f"📚 {subject_name}")
         col1, col2, col3 = st.columns(3)
         
         with col1:
@@ -665,7 +570,6 @@ for subject_name in st.session_state.grade_subjects:
             weights[subject_name] = st.number_input("Subject Weight", min_value=1, max_value=20, value=default_weight, step=1, key=f"weight_{subject_name}")
             st.session_state.subject_weights[subject_name] = weights[subject_name]
 
-# Add Subject Controls
 col_add_input, col_add_btn = st.columns([3, 1])
 with col_add_input:
     new_subject = st.text_input("New Subject Title", placeholder="e.g. Microeconomics", label_visibility="collapsed")
@@ -681,7 +585,6 @@ with col_add_btn:
             st.session_state.subject_weights[cleaned] = 1
             st.rerun()
 
-# Calculation Action Buttons
 col_calc, col_reset = st.columns(2)
 with col_calc:
     calculate = st.button("🧮 Compute GPA", use_container_width=True)
@@ -724,19 +627,17 @@ if calculate:
 
     st.markdown("<div style='margin-top: 24px;'></div>", unsafe_allow_html=True)
     
-    # Result Summary Hero
-    st.markdown(f"""
-    <div class="profile-card" style="text-align: center; border-color: rgba(56, 189, 248, 0.3);">
-        <span class="corporate-badge">CUMULATIVE GPA</span>
-        <h1 style="font-size: 3.5rem; margin: 10px 0; color: #ffffff;">{final_gpa:.2f} <span style="font-size: 1.5rem; color: #64748b;">/ 4.00</span></h1>
-        <p style="color: #38bdf8; font-weight: 600; margin: 0;">{"Academic Distinction" if final_gpa >= 3.5 else "Satisfactory Standing"}</p>
-    </div>
-    """, unsafe_allow_html=True)
+    with st.container(border=True):
+        st.markdown("<div style='text-align: center;'>", unsafe_allow_html=True)
+        st.caption("CUMULATIVE GPA")
+        st.markdown(f"<h1 style='font-size: 3.5rem; margin: 0; color: #ffffff;'>{final_gpa:.2f} <span style='font-size: 1.5rem; color: #64748b;'>/ 4.00</span></h1>", unsafe_allow_html=True)
+        st.markdown(f"<p style='color: #38bdf8; font-weight: 600;'>{'Academic Distinction' if final_gpa >= 3.5 else 'Satisfactory Standing'}</p>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("<p style='font-size:1.1rem; font-weight:700; color:#f8fafc; margin: 24px 0 12px 0;'>Subject Breakdown</p>", unsafe_allow_html=True)
 
     for res in results:
-        with st.container():
+        with st.container(border=True):
             c1, c2, c3 = st.columns([1.5, 1.5, 1])
             with c1:
                 st.markdown(f"**📚 {res['subject']}**")
@@ -747,7 +648,6 @@ if calculate:
             with c3:
                 st.markdown(f"### **{res['letter']}** ({res['points']:.1f})")
 
-# Grading Scale Reference Table
 st.markdown("<p style='font-size:1rem; font-weight:700; color:#cbd5e1; margin: 30px 0 12px 0;'>Standard Grading Scale Reference</p>", unsafe_allow_html=True)
 st.table({
     "Letter Grade": ["A", "B", "C", "D", "F"],
@@ -765,7 +665,7 @@ st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 st.markdown('<div id="quiz-maker" class="section-anchor"></div>', unsafe_allow_html=True)
 
 st.markdown("""
-<div style="margin-bottom: 24px;">
+<div style="margin-bottom: 20px;">
     <span class="corporate-badge">KNOWLEDGE ASSESSMENT</span>
     <h1 class="corporate-gradient-text" style="margin: 4px 0 8px 0; font-size: 2.2rem;">Quiz Master</h1>
     <p style="color: #94a3b8; font-size: 0.95rem; margin: 0;">Construct and take customized multiple-choice evaluations.</p>
@@ -783,8 +683,8 @@ if st.button("➕ Add New Question Item", use_container_width=True):
 
 if st.session_state.quiz_questions:
     for idx, q in enumerate(st.session_state.quiz_questions):
-        with st.container():
-            st.markdown(f"<p style='font-size:0.85rem; font-weight:700; color:#38bdf8;'>QUESTION {idx + 1}</p>", unsafe_allow_html=True)
+        with st.container(border=True):
+            st.caption(f"QUESTION {idx + 1}")
             q["question"] = st.text_input(f"Question Title #{idx + 1}", value=q["question"], key=f"q_title_{idx}")
             
             c1, c2 = st.columns(2)
