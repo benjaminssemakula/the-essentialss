@@ -85,6 +85,11 @@ st.markdown("""
 <style>
 html {
     scroll-behavior: smooth !important;
+    scroll-padding-top: 100px;
+}
+
+body {
+    scroll-behavior: smooth;
 }
 
 [data-testid="stAppViewContainer"] {
@@ -259,6 +264,89 @@ div[data-testid="stTable"] th {
 #MainMenu { visibility: hidden; }
 footer { visibility: hidden; }
 header { background: transparent !important; }
+
+
+/* RESPONSIVE MOBILE LAYOUT */
+@media (max-width: 640px) {
+    .block-container {
+        width: calc(100vw - 24px) !important;
+        max-width: none !important;
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+        padding-top: 12px !important;
+        padding-bottom: 48px !important;
+    }
+
+    .navigation-bar {
+        top: 8px;
+        border-radius: 16px;
+        padding: 8px;
+        margin-bottom: 24px;
+    }
+
+    .nav-grid {
+        gap: 5px;
+    }
+
+    .navigation-link {
+        min-width: 0;
+        padding: 9px 3px;
+        font-size: 11px;
+        border-radius: 10px;
+        white-space: nowrap;
+    }
+
+    .section-anchor {
+        scroll-margin-top: 82px;
+    }
+
+    .stButton > button {
+        min-width: 0 !important;
+        min-height: 38px !important;
+        height: 38px !important;
+        padding: 2px 3px !important;
+        font-size: 13px !important;
+        line-height: 1 !important;
+        border-radius: 9px !important;
+        white-space: nowrap !important;
+    }
+
+    [data-testid="column"] {
+        padding-left: 1px !important;
+        padding-right: 1px !important;
+        min-width: 0 !important;
+    }
+
+    /* Keep the calculator's 5-column grid inside the phone viewport. */
+    [data-testid="stHorizontalBlock"] {
+        gap: 4px !important;
+    }
+
+    .stTextInput input,
+    .stNumberInput input {
+        min-width: 0 !important;
+        font-size: 14px !important;
+    }
+
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        padding: 12px !important;
+        border-radius: 16px !important;
+    }
+}
+
+@media (max-width: 380px) {
+    .navigation-link {
+        font-size: 10px;
+        padding-left: 1px;
+        padding-right: 1px;
+    }
+
+    .stButton > button {
+        min-height: 36px !important;
+        height: 36px !important;
+        font-size: 12px !important;
+    }
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -270,24 +358,14 @@ st.markdown("""
 <div class="navigation-bar">
     <div class="navigation-title">ESSENTIALS</div>
     <div class="nav-grid">
-        <a class="navigation-link" href="#profile" onclick="scrollToSection(event, 'profile')">👤 Profile</a>
-        <a class="navigation-link" href="#calculator" onclick="scrollToSection(event, 'calculator')">🧮 Calculator</a>
-        <a class="navigation-link" href="#grading" onclick="scrollToSection(event, 'grading')">🎓 Grades</a>
-        <a class="navigation-link" href="#quiz-maker" onclick="scrollToSection(event, 'quiz-maker')">🧠 Quiz</a>
+        <a class="navigation-link" href="#profile">👤 Profile</a>
+        <a class="navigation-link" href="#calculator">🧮 Calculator</a>
+        <a class="navigation-link" href="#grading">🎓 Grades</a>
+        <a class="navigation-link" href="#quiz-maker">🧠 Quiz</a>
     </div>
 </div>
 
-<script>
-function scrollToSection(event, id) {
-    event.preventDefault();
-    var elem = document.getElementById(id);
-    var container = document.querySelector('[data-testid="stAppViewContainer"]') || window;
-    if (elem) {
-        var topPos = elem.getBoundingClientRect().top + (container.scrollTop || window.pageYOffset) - 100;
-        container.scrollTo({ top: topPos, behavior: 'smooth' });
-    }
-}
-</script>
+
 """, unsafe_allow_html=True)
 
 # ==========================================================
@@ -475,7 +553,7 @@ all_calculator_rows = [
 ]
 
 for row in all_calculator_rows:
-    cols = st.columns(5)
+    cols = st.columns(5, gap="small")
     for col, (label, key, value) in zip(cols, row):
         with col:
             if key == "backspace":
