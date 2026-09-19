@@ -89,7 +89,7 @@ st.markdown(
 
 st.title("🎓 My Streamlit App")
 
-st.write("Your custom live video background is working!")
+
 
 # ==========================================================
 # PAGE CONFIGURATION
