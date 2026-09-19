@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # ==========================================================
-# BACKGROUND VIDEO INJECTOR
+# BACKGROUND VIDEO INJECTOR (FIXED FOR STREAMLIT CANVAS)
 # ==========================================================
 
 video_path = os.path.join(
@@ -30,60 +30,70 @@ if os.path.exists(video_path):
 st.markdown(
     f"""
     <style>
-    /* App Canvas Background Reset */
-    .stApp {{
-        background: #0b0c10 !important;
-        color: #f1f5f9;
+    /* Force Streamlit main view container background transparent */
+    .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {{
+        background: transparent !important;
     }}
 
-    /* Video Background Container */
-    .custom-background {{
+    /* Fixed background video canvas */
+    #bg-video-container {{
         position: fixed;
         top: 0;
         left: 0;
         width: 100vw;
         height: 100vh;
-        z-index: -10;
+        z-index: -100;
         overflow: hidden;
         pointer-events: none;
     }}
 
-    .custom-background video {{
-        width: 100vw;
-        height: 100vh;
+    #bg-video-container video {{
+        min-width: 100%;
+        min-height: 100%;
+        width: auto;
+        height: auto;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
         object-fit: cover;
-        filter: brightness(0.45) contrast(1.1);
+        filter: brightness(0.4) contrast(1.1);
     }}
 
-    /* Frosted Blur Overlay */
-    .background-overlay {{
+    /* Frosted overlay gradient */
+    #bg-overlay {{
         position: fixed;
         top: 0;
         left: 0;
         width: 100vw;
         height: 100vh;
-        background: radial-gradient(circle at 50% 20%, rgba(15, 23, 42, 0.55) 0%, rgba(2, 6, 23, 0.92) 100%);
-        z-index: -9;
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
+        background: radial-gradient(circle at 50% 20%, rgba(15, 23, 42, 0.4) 0%, rgba(2, 6, 23, 0.85) 100%);
+        z-index: -99;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         pointer-events: none;
     }}
     </style>
 
-    {"<div class='custom-background'><video autoplay loop muted playsinline><source src='data:video/mp4;base64," + video_base64 + "' type='video/mp4'></video></div>" if video_base64 else ""}
-    <div class="background-overlay"></div>
+    <div id="bg-video-container">
+        {"<video autoplay loop muted playsinline webkit-playsinline preload='auto'><source src='data:video/mp4;base64," + video_base64 + "' type='video/mp4'></video>" if video_base64 else ""}
+    </div>
+    <div id="bg-overlay"></div>
     """,
     unsafe_allow_html=True
 )
 
+if not video_base64:
+    st.warning("⚠️ 'background.mp4' was not found in the same directory as this script. Place your video file alongside script.py to enable the video background.")
+
 # ==========================================================
-# EXECUTIVE DESIGN SYSTEM (CSS & NAVIGATION SCRIPT)
+# EXECUTIVE DESIGN SYSTEM & SMOOTH SCROLL SCRIPT
 # ==========================================================
 
 st.markdown("""
 <style>
-/* Smooth Scroll Enabling */
-html {
+/* Streamlit Internal Scroll Container Target */
+[data-testid="stAppViewContainer"] {
     scroll-behavior: smooth !important;
 }
 
@@ -96,13 +106,9 @@ html {
     padding-bottom: 80px !important;
 }
 
-html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
-    overflow-x: hidden !important;
-}
-
 /* Section Anchors Offset */
 .section-anchor {
-    scroll-margin-top: 100px;
+    scroll-margin-top: 110px;
 }
 
 /* Typography Styling */
@@ -168,6 +174,7 @@ h1, h2, h3, h4 {
     padding: 10px 6px;
     font-size: 13px;
     font-weight: 600;
+    cursor: pointer;
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -241,25 +248,31 @@ div[data-testid="stTable"] th {
     border-radius: 24px !important;
 }
 
-/* Section Divider */
 .section-divider {
     border: none;
     border-top: 1px solid rgba(255,255,255,0.1);
     margin: 40px 0;
 }
-
-/* Responsive Overrides */
-@media (max-width: 768px) {
-    .block-container {
-        padding-left: 10px !important;
-        padding-right: 10px !important;
-    }
-    .navigation-link {
-        font-size: 11px;
-        padding: 8px 2px;
-    }
-}
 </style>
+
+<!-- Streamlit Internal Container Smooth-Scroll Script -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const links = document.querySelectorAll('.navigation-link');
+    links.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = link.getAttribute('href').replace('#', '');
+            const targetElem = document.getElementById(targetId);
+            const container = document.querySelector('[data-testid="stAppViewContainer"]');
+            if (targetElem && container) {
+                const topOffset = targetElem.getBoundingClientRect().top + container.scrollTop - 110;
+                container.scrollTo({ top: topOffset, behavior: 'smooth' });
+            }
+        });
+    });
+});
+</script>
 """, unsafe_allow_html=True)
 
 # Hide Streamlit UI Chrome
@@ -321,7 +334,6 @@ with preview_col:
     
     initials = "".join([part[0].upper() for part in name.split()[:2]]) if name.strip() else "EX"
     
-    # Native Streamlit container cleanly holds layout without raw HTML code leaks
     with st.container(border=True):
         col_avatar, col_info = st.columns([1, 3])
         with col_avatar:
