@@ -641,8 +641,8 @@ components.html(
     const doc = window.parent.document;
     const win = window.parent;
 
-    if (doc.__smoothNavVersion === 4) return;
-    doc.__smoothNavVersion = 4;
+    if (doc.__smoothNavVersion === 5) return;
+    doc.__smoothNavVersion = 5;
 
     const OFFSET = 100;
     const DURATION = 620;
@@ -662,7 +662,10 @@ components.html(
 
     /* Probe every ancestor: whichever one actually moves the target is the
        real scroll container. Streamlit uses different ones on desktop,
-       mobile, and inside embeds, so guessing by CSS overflow is unreliable. */
+       mobile, and inside embeds, so guessing by CSS overflow is unreliable.
+       If nothing in the ancestor chain qualifies, the page-level scroller
+       is always returned as a guaranteed fallback — better to attempt a
+       scroll on the wrong element than to silently do nothing. */
     function findScroller(target) {
         let node = target.parentElement;
 
@@ -682,10 +685,7 @@ components.html(
             node = node.parentElement;
         }
 
-        const root = doc.scrollingElement || doc.documentElement;
-        if (root && root.scrollHeight - root.clientHeight > 4) return root;
-
-        return null;
+        return doc.scrollingElement || doc.documentElement || doc.body;
     }
 
     function tween(read, write, distance, done) {
@@ -705,10 +705,14 @@ components.html(
         win.requestAnimationFrame(frame);
     }
 
+    /* Always drive the scroll by hand rather than delegating to the browser's
+       own smooth-scroll (via CSS or scrollIntoView): when the OS has reduce
+       motion turned on, browsers silently clamp *any* author-requested smooth
+       scroll to an instant jump, no matter what behavior is passed in JS. A
+       manual rAF tween that sets scrollTop directly isn't subject to that
+       clamp, so it's the only way to guarantee an animation when asked for. */
     function manualScroll(target) {
         const scroller = findScroller(target);
-        if (!scroller) return false;
-
         const root = doc.scrollingElement || doc.documentElement;
         const usesWindow = scroller === root || scroller === doc.documentElement || scroller === doc.body;
 
@@ -716,7 +720,7 @@ components.html(
             ? target.getBoundingClientRect().top - OFFSET
             : target.getBoundingClientRect().top - scroller.getBoundingClientRect().top - OFFSET;
 
-        if (Math.abs(distance) < 1) return true;
+        if (Math.abs(distance) < 1) return;
 
         const previous = scroller.style.scrollBehavior;
         scroller.style.setProperty('scroll-behavior', 'auto', 'important');
@@ -726,7 +730,7 @@ components.html(
             if (usesWindow) win.scrollTo(0, win.scrollY + distance);
             else scroller.scrollTop += distance;
             restore();
-            return true;
+            return;
         }
 
         if (usesWindow) {
@@ -739,35 +743,10 @@ components.html(
                 restore
             );
         }
-
-        return true;
     }
 
     function scrollToTarget(target) {
-        const before = target.getBoundingClientRect().top;
-
-        /* Native first: the browser knows about nested scroll containers and
-           honours scroll-margin-top. */
-        let nativeWorked = false;
-        try {
-            target.scrollIntoView({
-                behavior: reduced() ? 'auto' : 'smooth',
-                block: 'start',
-                inline: 'nearest'
-            });
-            nativeWorked = true;
-        } catch (error) {
-            nativeWorked = false;
-        }
-
-        /* If nothing has budged shortly after, drive it ourselves. */
-        win.setTimeout(function () {
-            const after = target.getBoundingClientRect().top;
-            const stillNeeded = Math.abs(after - OFFSET) > 6;
-            if (!nativeWorked || (Math.abs(after - before) < 2 && stillNeeded)) {
-                manualScroll(target);
-            }
-        }, 180);
+        manualScroll(target);
     }
 
     doc.addEventListener('click', function (event) {
@@ -800,9 +779,8 @@ components.html(
         const scrollerLine = (function () {
             if (!target) return 'anchor not found';
             const scroller = findScroller(target);
-            if (!scroller) return 'no scrollable container found';
             return (scroller.tagName.toLowerCase()
-                + (scroller.getAttribute('data-testid') ? '[' + scroller.getAttribute('data-testid') + ']' : '')
+                + (scroller.getAttribute && scroller.getAttribute('data-testid') ? '[' + scroller.getAttribute('data-testid') + ']' : '')
                 + ' — scrollHeight ' + scroller.scrollHeight + ', clientHeight ' + scroller.clientHeight);
         })();
 
@@ -1468,9 +1446,10 @@ with st.expander("Navigation troubleshooting"):
 
     force_animation = st.toggle(
         "Animate even if my system prefers reduced motion",
-        value=False,
-        help="Turn this on if the report below says reduce-motion is true "
-        "but you'd still like the smooth scroll animation.",
+        value=True,
+        help="On by default: a nav click is a deliberate action, not incidental "
+        "motion, so it animates even when your OS has reduce-motion on. Turn "
+        "this off to respect that setting instead.",
     )
 
     components.html(
