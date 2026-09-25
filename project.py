@@ -1011,6 +1011,13 @@ if "grade_subjects" not in st.session_state:
 if "subject_weights" not in st.session_state:
     st.session_state.subject_weights = dict(DEFAULT_WEIGHTS)
 
+# Holds the last computed GPA/breakdown so it survives reruns triggered by
+# *other* widgets on the page (typing in the quiz section, etc). It is the
+# single source of truth for what gets rendered below, and Reset clears it
+# explicitly so a stale result can never linger after a reset.
+if "grade_results" not in st.session_state:
+    st.session_state.grade_results = None
+
 
 def get_letter_grade(score):
     if score >= 90:
@@ -1026,6 +1033,18 @@ def get_letter_grade(score):
 
 def get_grade_points(letter):
     return {"A": 4.0, "B": 3.0, "C": 2.0, "D": 1.0, "F": 0.0}[letter]
+
+
+def get_gpa_message(gpa):
+    if gpa >= 3.5:
+        return "success", "Outstanding work. Keep it up."
+    if gpa >= 3.0:
+        return "success", "Great results. Keep pushing."
+    if gpa >= 2.0:
+        return "info", "Solid effort. There's room to climb."
+    if gpa >= 1.0:
+        return "warning", "Keep studying — steady progress adds up."
+    return "error", "Plenty of room to improve. Start with one subject."
 
 
 scores = {}
@@ -1102,25 +1121,16 @@ st.markdown("---")
 
 
 def reset_grade_calculator():
+    st.session_state.grade_subjects = list(DEFAULT_SUBJECTS)
+    st.session_state.subject_weights = dict(DEFAULT_WEIGHTS)
 
-    st.session_state.grade_subjects = [
-        "Mathematics",
-        "Science",
-        "English"
-    ]
-
-    st.session_state.subject_weights = {
-        "Mathematics": 6,
-        "Science": 4,
-        "English": 5
-    }
-
+    # Clear every per-subject widget's stored value (scores, attendance,
+    # weights for both default AND any custom subjects that were added),
+    # so the widgets fall back to their `value=` defaults on the next run
+    # instead of keeping whatever the user last typed.
     keys_to_remove = [
-
         key
-
         for key in list(st.session_state.keys())
-
         if key.startswith("grade_score_")
         or key.startswith("attendance_")
         or key.startswith("weight_")
@@ -1129,22 +1139,24 @@ def reset_grade_calculator():
     for key in keys_to_remove:
         del st.session_state[key]
 
+    # Wipe the last calculated GPA/breakdown too, so nothing stale is left
+    # showing once the reset completes.
+    st.session_state.grade_results = None
+
 
 col1, col2 = st.columns(2)
 
 with col1:
-
     calculate = st.button(
         "🧮 Calculate GPA",
-        use_container_width=True
+        use_container_width=True,
     )
 
 with col2:
-
     st.button(
         "↻ Reset Everything",
         use_container_width=True,
-        on_click=reset_grade_calculator
+        on_click=reset_grade_calculator,
     )
 
 if calculate:
@@ -1181,6 +1193,18 @@ if calculate:
 
     final_gpa = total_weighted_gpa / total_weights if total_weights else 0.0
 
+    # Store the whole computed result in session_state (instead of using it
+    # straight from local variables) so it renders consistently below and
+    # keeps showing across unrelated reruns, until Reset explicitly clears it.
+    st.session_state.grade_results = {
+        "final_gpa": final_gpa,
+        "results": results,
+    }
+
+if st.session_state.grade_results:
+    final_gpa = st.session_state.grade_results["final_gpa"]
+    results = st.session_state.grade_results["results"]
+
     st.markdown("---")
 
     with st.container(border=True):
@@ -1208,16 +1232,8 @@ if calculate:
                 st.write(f"Subject weight — **{result['weight']}**")
                 st.write(f"GPA points — **{result['points']:.1f}**")
 
-    if final_gpa >= 3.5:
-        st.success("Outstanding work. Keep it up.")
-    elif final_gpa >= 3.0:
-        st.success("Great results. Keep pushing.")
-    elif final_gpa >= 2.0:
-        st.info("Solid effort. There's room to climb.")
-    elif final_gpa >= 1.0:
-        st.warning("Keep studying — steady progress adds up.")
-    else:
-        st.error("Plenty of room to improve. Start with one subject.")
+    message_kind, message_text = get_gpa_message(final_gpa)
+    getattr(st, message_kind)(message_text)
 
 
 st.markdown("---")
