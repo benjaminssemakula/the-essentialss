@@ -1096,27 +1096,56 @@ if add_subject:
         st.rerun()
 
 
+# Calculate / Reset
+
 st.markdown("---")
+
+
+def reset_grade_calculator():
+
+    st.session_state.grade_subjects = [
+        "Mathematics",
+        "Science",
+        "English"
+    ]
+
+    st.session_state.subject_weights = {
+        "Mathematics": 6,
+        "Science": 4,
+        "English": 5
+    }
+
+    keys_to_remove = [
+
+        key
+
+        for key in list(st.session_state.keys())
+
+        if key.startswith("grade_score_")
+        or key.startswith("attendance_")
+        or key.startswith("weight_")
+    ]
+
+    for key in keys_to_remove:
+        del st.session_state[key]
+
 
 col1, col2 = st.columns(2)
 
 with col1:
-    calculate = st.button("Calculate GPA", use_container_width=True, type="primary")
+
+    calculate = st.button(
+        "🧮 Calculate GPA",
+        use_container_width=True
+    )
 
 with col2:
-    reset = st.button("Reset everything", use_container_width=True)
 
-
-if reset:
-    st.session_state.grade_subjects = list(DEFAULT_SUBJECTS)
-    st.session_state.subject_weights = dict(DEFAULT_WEIGHTS)
-
-    for key in list(st.session_state.keys()):
-        if key.startswith(("grade_score_", "attendance_", "weight_")):
-            del st.session_state[key]
-
-    st.rerun()
-
+    st.button(
+        "↻ Reset Everything",
+        use_container_width=True,
+        on_click=reset_grade_calculator
+    )
 
 if calculate:
     total_weighted_gpa = 0
