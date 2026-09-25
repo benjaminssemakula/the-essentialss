@@ -270,6 +270,83 @@ html, body,
     font-weight: 500 !important;
 }
 
+/* ---------- login card (profile) ---------- */
+.st-key-profile_login {
+    max-width: 380px;
+    margin: 0 auto !important;
+}
+
+.login-avatar-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin: 6px 0 26px 0;
+}
+
+.login-avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(120% 120% at 30% 22%, var(--blue-hi) 0%, var(--blue) 55%, #1f4fa8 100%);
+    border: 1px solid var(--hairline-hi);
+    box-shadow: 0 10px 28px rgba(10, 132, 255, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+    font-size: 2.1rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+.login-avatar.login-avatar-empty {
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    color: rgba(235, 235, 245, 0.55);
+}
+
+.login-avatar svg { width: 40px; height: 40px; }
+
+.login-greeting {
+    color: var(--label);
+    font-size: 1.12rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    text-align: center;
+}
+
+.login-subtext {
+    color: var(--muted);
+    font-size: 0.88rem;
+    text-align: center;
+    margin-top: -8px;
+}
+
+/* The name field reads as the primary "username" row: bigger, centered. */
+.st-key-profile_login .stTextInput:first-of-type input {
+    text-align: center;
+    font-size: 1.08rem;
+    font-weight: 500;
+}
+
+.login-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    margin: 4px 0 14px 0;
+}
+
+.login-divider::before,
+.login-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--hairline);
+}
+
 /* ---------- buttons ---------- */
 .stButton > button {
     background: rgba(255, 255, 255, 0.09) !important;
@@ -785,16 +862,50 @@ st.markdown('<div id="profile" class="section-anchor"></div>', unsafe_allow_html
 
 st.title("Profile")
 st.markdown(
-    '<p class="lede">Tell us a little about yourself.</p>',
+    '<p class="lede">Sign in to set up your profile.</p>',
     unsafe_allow_html=True,
 )
 
-with st.container(border=True):
-    name = st.text_input("Name")
+# Filled in further down, once the name field's value is known — this slot
+# is what makes the avatar and greeting appear to sit above the form.
+avatar_slot = st.empty()
+
+PERSON_ICON = (
+    '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+    '<circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.6"/>'
+    '<path d="M4.5 20c1.4-3.8 4.4-5.7 7.5-5.7s6.1 1.9 7.5 5.7" '
+    'stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+    "</svg>"
+)
+
+with st.container(key="profile_login", border=True):
+    name = st.text_input("Name", placeholder="Your name")
+
+    st.markdown('<div class="login-divider"></div>', unsafe_allow_html=True)
+
     age = st.number_input("Age", min_value=1, max_value=100, step=1)
-    school = st.text_input("School")
-    favorite_subject = st.text_input("Favorite subject")
-    hobby = st.text_input("Favorite hobby")
+    school = st.text_input("School", placeholder="Your school")
+    favorite_subject = st.text_input("Favorite subject", placeholder="e.g. Science")
+    hobby = st.text_input("Favorite hobby", placeholder="e.g. Chess")
+
+    continue_clicked = st.button("Continue", use_container_width=True, type="primary")
+
+trimmed_name = name.strip()
+
+if trimmed_name:
+    avatar_html = f'<div class="login-avatar">{trimmed_name[0].upper()}</div>'
+    greeting_html = f'<div class="login-greeting">Welcome, {trimmed_name}</div>'
+else:
+    avatar_html = f'<div class="login-avatar login-avatar-empty">{PERSON_ICON}</div>'
+    greeting_html = (
+        '<div class="login-greeting">Welcome</div>'
+        '<div class="login-subtext">Enter your name to continue</div>'
+    )
+
+avatar_slot.markdown(
+    f'<div class="login-avatar-wrap">{avatar_html}{greeting_html}</div>',
+    unsafe_allow_html=True,
+)
 
 
 @st.dialog("Profile created")
@@ -812,11 +923,11 @@ def show_profile_popup():
         st.rerun()
 
 
-if st.button("Create profile", use_container_width=True, type="primary"):
+if continue_clicked:
     if name and school and favorite_subject and hobby:
         show_profile_popup()
     else:
-        st.warning("Fill in every field to create your profile.")
+        st.warning("Fill in every field to continue.")
 
 
 st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
