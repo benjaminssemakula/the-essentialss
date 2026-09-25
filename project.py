@@ -353,6 +353,66 @@ html, body,
     background: var(--hairline);
 }
 
+/* ---------- profile gate ---------- */
+.st-key-profile_gate {
+    max-width: 420px;
+    margin: 0 auto !important;
+    text-align: center;
+}
+
+.profile-gate-icon {
+    width: 68px;
+    height: 68px;
+    margin: 2px auto 18px auto;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid var(--hairline);
+    color: rgba(235, 235, 245, 0.72);
+}
+
+.profile-gate-icon svg { width: 28px; height: 28px; }
+
+.profile-gate-title {
+    color: var(--label);
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: -0.018em;
+    margin-bottom: 8px;
+}
+
+.profile-gate-subtext {
+    color: var(--muted) !important;
+    font-size: 0.92rem;
+    max-width: 34ch;
+    margin: 0 auto 22px auto;
+}
+
+.profile-gate-checklist {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 11px;
+    text-align: left;
+}
+
+.profile-gate-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 0.94rem;
+}
+
+.profile-gate-row svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+.profile-gate-row.done span {
+    color: var(--body);
+    font-weight: 500;
+}
+
 /* ---------- buttons ---------- */
 .stButton > button {
     background: rgba(255, 255, 255, 0.09) !important;
@@ -954,14 +1014,49 @@ if continue_clicked:
 st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
 
 if not st.session_state.profile_complete:
-    with st.container(border=True):
-        st.subheader("Finish your profile to continue")
+    LOCK_ICON = (
+        '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+        '<rect x="5" y="10.5" width="14" height="10" rx="2.4" stroke="currentColor" stroke-width="1.6"/>'
+        '<path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+        "</svg>"
+    )
+    CHECK_ICON = (
+        '<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">'
+        '<circle cx="10" cy="10" r="9" fill="var(--blue)"/>'
+        '<path d="M6 10.2l2.4 2.4L14 7.4" stroke="#fff" stroke-width="1.6" '
+        'stroke-linecap="round" stroke-linejoin="round"/>'
+        "</svg>"
+    )
+    PENDING_ICON = (
+        '<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">'
+        '<circle cx="10" cy="10" r="8.2" stroke="rgba(235,235,245,0.38)" stroke-width="1.4"/>'
+        "</svg>"
+    )
+
+    required_fields = [
+        ("Name", bool(name.strip())),
+        ("School", bool(school.strip())),
+        ("Favorite subject", bool(favorite_subject.strip())),
+        ("Favorite hobby", bool(hobby.strip())),
+    ]
+
+    checklist_rows = "".join(
+        f'<div class="profile-gate-row{" done" if is_done else ""}">'
+        f'{CHECK_ICON if is_done else PENDING_ICON}<span>{field_label}</span></div>'
+        for field_label, is_done in required_fields
+    )
+
+    with st.container(key="profile_gate", border=True):
         st.markdown(
-            '<p class="lede" style="margin:0">'
-            "Fill in your name, age, school, favorite subject, and hobby above, "
-            "then press Continue. The calculator, grades, and quiz sections "
-            "unlock once your profile is set up."
-            "</p>",
+            f"""
+            <div class="profile-gate-icon">{LOCK_ICON}</div>
+            <div class="profile-gate-title">Finish your profile to continue</div>
+            <p class="profile-gate-subtext">
+                Complete the fields below and press Continue to unlock the
+                calculator, grades, and quiz sections.
+            </p>
+            <div class="profile-gate-checklist">{checklist_rows}</div>
+            """,
             unsafe_allow_html=True,
         )
     st.stop()
