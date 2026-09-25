@@ -277,6 +277,44 @@ html, body,
 }
 
 /* ---------- login card (profile) ---------- */
+
+/* The status card and the form sit in a two-column row; without this the
+   row's cross-axis defaults to flex-start, so the shorter card (the status
+   card) just hugs the top and leaves empty space instead of matching the
+   taller form's height — making the pair look staggered rather than a
+   clean, even split. Stretching both, then centering the shorter card's
+   own content inside it, is what makes them line up as one unit. */
+div[data-testid="stHorizontalBlock"]:has(.st-key-profile_gate) {
+    align-items: stretch !important;
+}
+
+div[data-testid="stHorizontalBlock"]:has(.st-key-profile_gate) > div[data-testid="column"] {
+    display: flex;
+}
+
+div[data-testid="stHorizontalBlock"]:has(.st-key-profile_gate) > div[data-testid="column"] > div {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.st-key-profile_gate,
+.st-key-profile_login {
+    display: flex;
+    flex: 1;
+}
+
+.st-key-profile_gate [data-testid="stVerticalBlockBorderWrapper"] {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.st-key-profile_login [data-testid="stVerticalBlockBorderWrapper"] {
+    flex: 1;
+}
+
 .st-key-profile_login {
     max-width: 380px;
     margin: 0 auto !important;
