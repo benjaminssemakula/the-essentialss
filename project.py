@@ -20,6 +20,12 @@ st.set_page_config(
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
 VIDEO_PATH = os.path.join(APP_DIR, "background.mp4")
 
+# Gates the Calculator, Grades, and Quiz sections until the profile form
+# below is filled in and submitted — set to True only once, inside the
+# Profile section itself.
+if "profile_complete" not in st.session_state:
+    st.session_state.profile_complete = False
+
 
 # ==========================================================
 # LIVE VIDEO BACKGROUND
@@ -591,6 +597,11 @@ html, body, .stApp,
     box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.5);
 }
 
+.navigation-link-locked {
+    color: rgba(235, 235, 245, 0.34) !important;
+    cursor: not-allowed;
+}
+
 /* ---------- dialogs + motion ---------- */
 @keyframes sheetIn {
     from { opacity: 0; transform: scale(0.94) translateY(16px); }
@@ -705,18 +716,27 @@ html, body, .stApp,
 # NAVIGATION
 # ==========================================================
 
+
+def nav_link(anchor_id, label):
+    """A normal scroll link once unlocked; a plain, unclickable label until then."""
+    if st.session_state.profile_complete:
+        return f'<a class="navigation-link" href="#{anchor_id}" data-smooth="{anchor_id}">{label}</a>'
+    return f'<span class="navigation-link navigation-link-locked">{label}</span>'
+
+
 st.markdown(
-    """
+    f"""
 <div class="brand-mark">Essentials</div>
 <div class="navigation-bar">
     <a class="navigation-link" href="#profile" data-smooth="profile">Profile</a>
-    <a class="navigation-link" href="#calculator" data-smooth="calculator">Calculator</a>
-    <a class="navigation-link" href="#grading" data-smooth="grading">Grades</a>
-    <a class="navigation-link" href="#quiz-maker" data-smooth="quiz-maker">Quiz</a>
+    {nav_link("calculator", "Calculator")}
+    {nav_link("grading", "Grades")}
+    {nav_link("quiz-maker", "Quiz")}
 </div>
 """,
     unsafe_allow_html=True,
 )
+
 
 
 # Streamlit scrolls a different element depending on browser and screen size:
@@ -925,12 +945,26 @@ def show_profile_popup():
 
 if continue_clicked:
     if name and school and favorite_subject and hobby:
+        st.session_state.profile_complete = True
         show_profile_popup()
     else:
         st.warning("Fill in every field to continue.")
 
 
 st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
+
+if not st.session_state.profile_complete:
+    with st.container(border=True):
+        st.subheader("Finish your profile to continue")
+        st.markdown(
+            '<p class="lede" style="margin:0">'
+            "Fill in your name, age, school, favorite subject, and hobby above, "
+            "then press Continue. The calculator, grades, and quiz sections "
+            "unlock once your profile is set up."
+            "</p>",
+            unsafe_allow_html=True,
+        )
+    st.stop()
 
 
 # ==========================================================
