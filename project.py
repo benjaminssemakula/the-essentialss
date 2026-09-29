@@ -1,5 +1,6 @@
 import base64
 import math
+import textwrap
 import os
 from uuid import uuid4
 
@@ -1486,263 +1487,16 @@ components.html(
 st.markdown(
     """
 <style>
-/* ==========================================================
-   ESSENTIALS PROFILE — split login-page redesign
-   Keeps the existing dark / Apple-style Essentials theme.
-   ========================================================== */
-
-.profile-login-shell {
-    display: grid;
-    grid-template-columns: 0.95fr 1.05fr;
-    min-height: 610px;
-    margin: 8px auto 34px auto;
-    max-width: 900px;
-    overflow: hidden;
-    border-radius: 30px;
-    border: 1px solid rgba(255,255,255,0.13);
-    background: rgba(15, 17, 22, 0.78);
-    box-shadow: 0 30px 90px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.08);
-    backdrop-filter: blur(36px) saturate(150%);
-    -webkit-backdrop-filter: blur(36px) saturate(150%);
-}
-.profile-brand-panel {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-width: 0;
-    padding: 38px 38px 34px 38px;
-    overflow: hidden;
-    background:
-        radial-gradient(120% 90% at 15% 0%, rgba(61,157,255,0.24), transparent 55%),
-        radial-gradient(90% 80% at 100% 100%, rgba(10,132,255,0.12), transparent 60%),
-        rgba(255,255,255,0.035);
-    border-right: 1px solid rgba(255,255,255,0.10);
-}
-.profile-brand-panel::before,
-.profile-brand-panel::after {
-    content: "";
-    position: absolute;
-    border-radius: 50%;
-    pointer-events: none;
-}
-.profile-brand-panel::before {
-    width: 230px; height: 230px; right: -90px; top: 90px;
-    background: rgba(10,132,255,0.10);
-    filter: blur(3px);
-}
-.profile-brand-panel::after {
-    width: 150px; height: 150px; left: -70px; bottom: 60px;
-    background: rgba(61,157,255,0.08);
-}
-.profile-brand {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #fff;
-    font-size: 1.12rem;
-    font-weight: 700;
-    letter-spacing: -0.025em;
-}
-.profile-brand-mark {
-    width: 34px; height: 34px;
-    display: grid; place-items: center;
-    border-radius: 10px;
-    background: linear-gradient(145deg, #3d9dff, #0a84ff);
-    box-shadow: 0 8px 24px rgba(10,132,255,0.34);
-    color: #fff;
-    font-size: 1.05rem;
-}
-.profile-brand-copy {
-    position: relative;
-    z-index: 1;
-    margin-top: auto;
-    margin-bottom: auto;
-    max-width: 330px;
-}
-.profile-brand-kicker {
-    color: #3d9dff;
-    font-size: 0.76rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    margin-bottom: 14px;
-}
-.profile-brand-title {
-    color: #fff;
-    font-size: clamp(2.2rem, 4vw, 3.35rem);
-    font-weight: 750;
-    letter-spacing: -0.045em;
-    line-height: 0.98;
-    margin-bottom: 18px;
-}
-.profile-brand-text {
-    color: rgba(235,235,245,0.68);
-    font-size: 0.98rem;
-    line-height: 1.55;
-    max-width: 31ch;
-}
-.profile-illustration {
-    position: relative;
-    z-index: 1;
-    width: 210px; height: 190px;
-    margin: 34px auto 0 auto;
-}
-.profile-illustration .orb {
-    position: absolute;
-    width: 145px; height: 145px; left: 32px; top: 8px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 28%, rgba(61,157,255,0.75), rgba(10,132,255,0.18) 62%, transparent 70%);
-    box-shadow: 0 0 70px rgba(10,132,255,0.18);
-}
-.profile-illustration .cap {
-    position: absolute;
-    left: 42px; top: 43px;
-    width: 120px; height: 72px;
-    transform: rotate(-7deg);
-}
-.profile-illustration .cap-top {
-    position: absolute;
-    left: 12px; top: 5px;
-    width: 96px; height: 58px;
-    background: linear-gradient(145deg, #64b1ff, #0a84ff);
-    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-    filter: drop-shadow(0 12px 16px rgba(10,132,255,0.24));
-}
-.profile-illustration .cap-base {
-    position: absolute;
-    left: 35px; top: 44px;
-    width: 52px; height: 25px;
-    border-radius: 0 0 12px 12px;
-    background: #1c4f91;
-}
-.profile-illustration .tassel {
-    position: absolute;
-    right: 0; top: 31px;
-    width: 40px; height: 3px;
-    border-radius: 10px;
-    background: #ff9f0a;
-    transform: rotate(27deg);
-    transform-origin: left center;
-}
-.profile-illustration .tassel::after {
-    content: "";
-    position: absolute;
-    right: -4px; top: -2px;
-    width: 8px; height: 22px;
-    border-radius: 0 0 5px 5px;
-    background: #ff9f0a;
-}
-.profile-brand-footer {
-    position: relative;
-    z-index: 1;
-    color: rgba(235,235,245,0.42);
-    font-size: 0.76rem;
-}
-.profile-form-panel {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 48px 52px;
-    min-width: 0;
-    background: rgba(255,255,255,0.025);
-}
-.profile-form-heading { margin-bottom: 28px; }
-.profile-form-heading h2 {
-    color: #fff !important;
-    font-size: 2rem !important;
-    font-weight: 700 !important;
-    letter-spacing: -0.035em !important;
-    margin: 0 0 7px 0 !important;
-}
-.profile-form-heading p {
-    color: rgba(235,235,245,0.55) !important;
-    font-size: 0.9rem;
-    margin: 0;
-}
-.profile-form-panel .stTextInput label,
-.profile-form-panel .stSlider label {
-    color: rgba(235,235,245,0.62) !important;
-    font-size: 0.78rem !important;
-    font-weight: 600 !important;
-}
-.profile-form-panel .stTextInput input {
-    background: rgba(255,255,255,0.055) !important;
-    border: 1px solid rgba(255,255,255,0.15) !important;
-    border-radius: 12px !important;
-    color: #fff !important;
-}
-.profile-form-panel .stTextInput input::placeholder {
-    color: rgba(235,235,245,0.34) !important;
-}
-.profile-form-panel .stSlider { margin-top: 2px; }
-.profile-form-panel .stButton > button {
-    min-height: 50px !important;
-    border-radius: 13px !important;
-    margin-top: 8px;
-}
-.profile-form-panel .stButton > button[kind="primary"] {
-    background: linear-gradient(180deg, #3d9dff, #0a84ff) !important;
-}
-.profile-progress-mini {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin: 5px 0 22px 0;
-    color: rgba(235,235,245,0.42);
-    font-size: 0.74rem;
-}
-.profile-progress-line {
-    flex: 1;
-    height: 4px;
-    overflow: hidden;
-    border-radius: 99px;
-    background: rgba(255,255,255,0.08);
-}
-.profile-progress-line span {
-    display: block;
-    height: 100%;
-    border-radius: inherit;
-    background: linear-gradient(90deg, #0a84ff, #64b1ff);
-    transition: width 0.35s ease;
-}
-@media (max-width: 768px) {
-    .profile-login-shell {
-        grid-template-columns: 1fr;
-        min-height: auto;
-        margin-top: 4px;
-        border-radius: 24px;
-    }
-    .profile-brand-panel {
-        min-height: 310px;
-        padding: 26px 24px 24px;
-        border-right: none;
-        border-bottom: 1px solid rgba(255,255,255,0.10);
-    }
-    .profile-brand-copy { margin-top: 30px; margin-bottom: 0; }
-    .profile-brand-title { font-size: 2.15rem; }
-    .profile-brand-text { font-size: 0.9rem; }
-    .profile-illustration {
-        position: absolute;
-        right: -25px;
-        bottom: -24px;
-        width: 170px;
-        height: 155px;
-        transform: scale(0.8);
-        transform-origin: bottom right;
-        opacity: 0.82;
-    }
-    .profile-form-panel { padding: 30px 22px 26px; }
-    .profile-form-heading h2 { font-size: 1.7rem !important; }
-}
-@media (max-width: 420px) {
-    .profile-brand-panel { min-height: 285px; padding: 23px 20px; }
-    .profile-brand-title { font-size: 1.95rem; }
-    .profile-form-panel { padding: 26px 17px 22px; }
-}
+.profile-login-shell{width:min(920px,94vw);height:calc(100vh - 105px);min-height:560px;max-height:720px;margin:0 auto;display:grid;grid-template-columns:48% 52%;overflow:hidden;border-radius:28px;border:1px solid rgba(255,255,255,.14);background:rgba(13,16,23,.86);box-shadow:0 28px 80px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.08);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px)}
+.profile-brand-panel{position:relative;display:flex;flex-direction:column;min-width:0;padding:30px 32px 25px;overflow:hidden;background:radial-gradient(circle at 20% 15%,rgba(61,157,255,.25),transparent 45%),radial-gradient(circle at 80% 85%,rgba(10,132,255,.13),transparent 50%),rgba(255,255,255,.025);border-right:1px solid rgba(255,255,255,.10)}
+.profile-brand{display:flex;align-items:center;gap:10px;color:#fff;font-size:1.08rem;font-weight:700;position:relative;z-index:2}.profile-brand-mark{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(145deg,#3d9dff,#0a84ff);box-shadow:0 8px 24px rgba(10,132,255,.35)}
+.profile-brand-copy{position:relative;z-index:2;margin:auto 0 0;max-width:355px}.profile-brand-kicker{color:#64b1ff;font-size:.68rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;margin-bottom:9px}.profile-brand-title{color:#fff;font-size:clamp(2rem,3.4vw,3rem);font-weight:750;letter-spacing:-.045em;line-height:.98;margin-bottom:12px}.profile-brand-text{color:rgba(235,235,245,.64);font-size:.88rem;line-height:1.45;max-width:34ch}
+.profile-picture{width:100%;max-width:360px;height:245px;object-fit:contain;display:block;margin:8px auto -3px;filter:drop-shadow(0 18px 28px rgba(0,0,0,.28))}
+.profile-brand-footer{position:relative;z-index:2;color:rgba(235,235,245,.36);font-size:.68rem;margin-top:auto}
+.profile-form-panel{display:flex;flex-direction:column;justify-content:center;padding:36px 46px;min-width:0}.profile-form-heading{margin-bottom:18px}.profile-form-heading h2{color:#fff!important;font-size:1.9rem!important;font-weight:700!important;letter-spacing:-.035em!important;margin:0 0 5px!important}.profile-form-heading p{color:rgba(235,235,245,.52)!important;font-size:.82rem;margin:0}
+.profile-form-panel .stTextInput{margin-bottom:7px}.profile-form-panel .stTextInput label,.profile-form-panel .stSlider label{color:rgba(235,235,245,.58)!important;font-size:.72rem!important;font-weight:600!important}.profile-form-panel .stTextInput input{height:43px;background:rgba(255,255,255,.055)!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:11px!important;color:#fff!important;font-size:.86rem!important}.profile-form-panel .stTextInput input::placeholder{color:rgba(235,235,245,.30)!important}.profile-form-panel .stSlider{margin:1px 0 3px}.profile-form-panel .stButton>button{min-height:45px!important;border-radius:12px!important;margin-top:5px}.profile-form-panel .stButton>button[kind="primary"]{background:linear-gradient(180deg,#3d9dff,#0a84ff)!important;border:0!important}.profile-progress-mini{display:flex;align-items:center;gap:9px;margin:5px 0 13px;color:rgba(235,235,245,.38);font-size:.68rem}.profile-progress-line{flex:1;height:3px;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.08)}.profile-progress-line span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#0a84ff,#64b1ff)}
+@media(max-width:768px){.profile-login-shell{width:94vw;height:calc(100vh - 82px);min-height:560px;max-height:none;grid-template-columns:1fr;grid-template-rows:39% 61%;border-radius:22px}.profile-brand-panel{padding:19px 21px 15px;border-right:0;border-bottom:1px solid rgba(255,255,255,.1)}.profile-brand-copy{margin:auto 0 0}.profile-brand-title{font-size:1.65rem}.profile-brand-text{font-size:.76rem;max-width:30ch}.profile-picture{position:absolute;width:190px;height:150px;right:-15px;bottom:-8px;margin:0;opacity:.9}.profile-brand-footer{display:none}.profile-form-panel{padding:20px 21px;justify-content:center}.profile-form-heading{margin-bottom:10px}.profile-form-heading h2{font-size:1.55rem!important}.profile-form-panel .stTextInput input{height:40px}.profile-progress-mini{margin-bottom:7px}}
+@media(max-width:420px){.profile-login-shell{grid-template-rows:36% 64%;height:calc(100vh - 72px)}.profile-brand-panel{padding:17px 17px 12px}.profile-brand-kicker{font-size:.6rem}.profile-brand-title{font-size:1.42rem}.profile-brand-text{font-size:.69rem}.profile-picture{width:155px;height:125px;right:-10px}.profile-form-panel{padding:16px 17px}.profile-form-heading h2{font-size:1.35rem!important}.profile-form-panel .stTextInput{margin-bottom:3px}.profile-form-panel .stTextInput input{height:37px;font-size:.8rem!important}.profile-form-panel .stTextInput label,.profile-form-panel .stSlider label{font-size:.65rem!important}.profile-form-panel .stButton>button{min-height:40px!important}}
 </style>
     """,
     unsafe_allow_html=True,
@@ -1759,99 +1513,75 @@ if "profile_name" not in st.session_state:
 if not st.session_state.profile_complete:
     st.markdown('<div id="profile" class="section-anchor"></div>', unsafe_allow_html=True)
 
+    profile_picture = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MjAgNDIwIj4KPGRlZnM+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJiZyIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzE3MzY1ZiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzBiMTQyNCIvPjwvbGluZWFyR3JhZGllbnQ+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJzaGlydCIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzVmYjJmZiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzBhODRmZiIvPjwvbGluZWFyR3JhZGllbnQ+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJkZXNrIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMCI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjMjQ0NzZlIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMTAyNDNjIi8+PC9saW5lYXJHcmFkaWVudD4KICA8ZmlsdGVyIGlkPSJzaGFkb3ciPjxmZUdhdXNzaWFuQmx1ciBzdGREZXZpYXRpb249IjEwIi8+PC9maWx0ZXI+CjwvZGVmcz4KPGVsbGlwc2UgY3g9IjI2MCIgY3k9IjM4MCIgcng9IjE5MCIgcnk9IjI0IiBmaWxsPSIjMDAwIiBvcGFjaXR5PSIuMjgiIGZpbHRlcj0idXJsKCNzaGFkb3cpIi8+CjxjaXJjbGUgY3g9IjI2NSIgY3k9IjE4NCIgcj0iMTUwIiBmaWxsPSJ1cmwoI2JnKSIgb3BhY2l0eT0iLjk1Ii8+CjxjaXJjbGUgY3g9IjM1NSIgY3k9IjEwNSIgcj0iNDYiIGZpbGw9IiMzZDlkZmYiIG9wYWNpdHk9Ii4xMiIvPgo8Y2lyY2xlIGN4PSIxMjUiIGN5PSIyNzUiIHI9IjM0IiBmaWxsPSIjMGE4NGZmIiBvcGFjaXR5PSIuMTIiLz4KPCEtLSBmbG9hdGluZyBjYXJkcyAtLT4KPHJlY3QgeD0iNjAiIHk9IjkyIiB3aWR0aD0iMTA0IiBoZWlnaHQ9IjY2IiByeD0iMTQiIGZpbGw9IiNmZmYiIG9wYWNpdHk9Ii4wOSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utb3BhY2l0eT0iLjEyIi8+CjxyZWN0IHg9Ijc2IiB5PSIxMTAiIHdpZHRoPSI1MCIgaGVpZ2h0PSI3IiByeD0iNCIgZmlsbD0iIzY0YjFmZiIgb3BhY2l0eT0iLjkiLz4KPHJlY3QgeD0iNzYiIHk9IjEyNiIgd2lkdGg9IjcyIiBoZWlnaHQ9IjYiIHJ4PSIzIiBmaWxsPSIjZmZmIiBvcGFjaXR5PSIuMjUiLz4KPHJlY3QgeD0iNzYiIHk9IjE0MSIgd2lkdGg9IjQzIiBoZWlnaHQ9IjYiIHJ4PSIzIiBmaWxsPSIjZmZmIiBvcGFjaXR5PSIuMTYiLz4KPHJlY3QgeD0iMzYwIiB5PSIyMTUiIHdpZHRoPSIxMDIiIGhlaWdodD0iNzQiIHJ4PSIxNiIgZmlsbD0iI2ZmZiIgb3BhY2l0eT0iLjA4IiBzdHJva2U9IiNmZmYiIHN0cm9rZS1vcGFjaXR5PSIuMTIiLz4KPHBhdGggZD0iTTM3OCAyNjYgTDM3OCAyNDcgTDM5NSAyNTcgTDQxMCAyMzUgTDQyNSAyNDkgTDQ0NiAyMjUiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzY0YjFmZiIgc3Ryb2tlLXdpZHRoPSI1IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPCEtLSBwZXJzb24gLS0+CjxjaXJjbGUgY3g9IjI1NyIgY3k9IjEyMiIgcj0iMzkiIGZpbGw9IiNmMWIxOGQiLz4KPHBhdGggZD0iTTIxOCAxMTkgUTIyMCA3NyAyNjEgNzYgUTI5NiA3OSAyOTggMTEzIFEyODAgOTggMjYxIDEwMCBRMjQwIDEwMyAyMTggMTE5WiIgZmlsbD0iIzIwMjczNSIvPgo8cGF0aCBkPSJNMjE5IDExOSBRMjEwIDEyNSAyMTEgMTQ0IFEyMzAgMTMyIDI0MiAxMjVaIiBmaWxsPSIjMjAyNzM1Ii8+CjxjaXJjbGUgY3g9IjI0MiIgY3k9IjEyNSIgcj0iNCIgZmlsbD0iIzFiMjMzMCIvPjxjaXJjbGUgY3g9IjI3NSIgY3k9IjEyNSIgcj0iNCIgZmlsbD0iIzFiMjMzMCIvPgo8cGF0aCBkPSJNMjUwIDE0MyBRMjYwIDE1MCAyNzAgMTQzIiBmaWxsPSJub25lIiBzdHJva2U9IiNiNjZmNjIiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CjwhLS0gYm9keSAtLT4KPHBhdGggZD0iTTE5NiAyMTkgUTIwNyAxNzUgMjU0IDE3NCBRMzAxIDE3NSAzMTkgMjE5IEwzMDAgMjgzIEwyMTQgMjgzWiIgZmlsbD0idXJsKCNzaGlydCkiLz4KPHBhdGggZD0iTTIzMCAxODEgUTI1NyAyMDUgMjgzIDE4MSBMMjg5IDIyMSBRMjU4IDIzNiAyMjQgMjIxWiIgZmlsbD0iI2Q5ZWZmZiIgb3BhY2l0eT0iLjkiLz4KPCEtLSBhcm1zIHR5cGluZyAtLT4KPHBhdGggZD0iTTIxNSAyMTcgUTE4OCAyMzEgMTc3IDI2MyBRMTc2IDI3MiAxODYgMjc2IFExOTUgMjc5IDIwMSAyNjkgTDIyOSAyNDIiIGZpbGw9IiNmMWIxOGQiLz4KPHBhdGggZD0iTTMwMiAyMTcgUTMyOCAyMzIgMzQwIDI2MCBRMzQzIDI2OSAzMzQgMjc0IFEzMjQgMjc4IDMxNyAyNjggTDI4OCAyNDEiIGZpbGw9IiNmMWIxOGQiLz4KPCEtLSBsYXB0b3AgLS0+CjxwYXRoIGQ9Ik0yMDIgMjQ4IEwzMTggMjQ4IEwzMzMgMzA0IEwxODggMzA0WiIgZmlsbD0iI2JjZDlmNSIgb3BhY2l0eT0iLjk1Ii8+CjxyZWN0IHg9IjIxNCIgeT0iMjU3IiB3aWR0aD0iOTIiIGhlaWdodD0iMzQiIHJ4PSI0IiBmaWxsPSIjMGQxZDMxIi8+CjxjaXJjbGUgY3g9IjI2MCIgY3k9IjI3NCIgcj0iOCIgZmlsbD0iIzNkOWRmZiIgb3BhY2l0eT0iLjgiLz4KPHBhdGggZD0iTTE3NyAzMDQgTDM0MiAzMDQgTDM2NSAzMjIgTDE1NSAzMjJaIiBmaWxsPSJ1cmwoI2Rlc2spIi8+CjwhLS0gYm9va3MgLS0+CjxyZWN0IHg9IjkxIiB5PSIzMTMiIHdpZHRoPSI5NCIgaGVpZ2h0PSIxNiIgcng9IjUiIGZpbGw9IiMwYTg0ZmYiIG9wYWNpdHk9Ii44IiB0cmFuc2Zvcm09InJvdGF0ZSgtNyA5MSAzMTMpIi8+CjxyZWN0IHg9IjEwNSIgeT0iMzI5IiB3aWR0aD0iODQiIGhlaWdodD0iMTMiIHJ4PSI1IiBmaWxsPSIjNjRiMWZmIiBvcGFjaXR5PSIuNSIgdHJhbnNmb3JtPSJyb3RhdGUoLTcgMTA1IDMyOSkiLz4KPCEtLSBsaXR0bGUgc3BhcmtsZXMgLS0+CjxwYXRoIGQ9Ik0zOTAgODggdjI0IE0zNzggMTAwIGgyNCIgc3Ryb2tlPSIjNjRiMWZmIiBzdHJva2Utd2lkdGg9IjQiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8cGF0aCBkPSJNMTE2IDIwMSB2MTYgTTEwOCAyMDkgaDE2IiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBvcGFjaXR5PSIuNSIvPgo8L3N2Zz4="
+
     st.markdown(
-        """
+        textwrap.dedent(f"""
         <div class="profile-login-shell">
             <div class="profile-brand-panel">
                 <div class="profile-brand">
                     <div class="profile-brand-mark">✦</div>
                     <span>Essentials</span>
                 </div>
-
                 <div class="profile-brand-copy">
                     <div class="profile-brand-kicker">Student workspace</div>
                     <div class="profile-brand-title">Everything you need, in one place.</div>
                     <div class="profile-brand-text">
-                        Set up your profile to unlock your calculator, grades,
-                        and quiz tools in a clean, personalized workspace.
+                        Set up your profile to unlock your calculator, grades, and quiz tools.
                     </div>
-
-                    <div class="profile-illustration" aria-hidden="true">
-                        <div class="orb"></div>
-                        <div class="cap">
-                            <div class="cap-top"></div>
-                            <div class="cap-base"></div>
-                            <div class="tassel"></div>
-                        </div>
-                    </div>
+                    <img class="profile-picture" src="{profile_picture}" alt="Student using Essentials" />
                 </div>
-
                 <div class="profile-brand-footer">Your information stays in this session.</div>
             </div>
-
             <div class="profile-form-panel">
                 <div class="profile-form-heading">
                     <h2>Welcome to Essentials</h2>
-                    <p>Log in by completing your student profile.</p>
+                    <p>Complete your student profile to continue.</p>
                 </div>
-        """,
+        """),
         unsafe_allow_html=True,
     )
 
-    name = st.text_input("Name", placeholder="Enter your name")
-    school = st.text_input("School", placeholder="Enter your school")
+    # Compact two-column fields keep the whole login/profile experience on one screen.
+    c1, c2 = st.columns(2, gap="small")
+    with c1:
+        name = st.text_input("Name", placeholder="Your name")
+    with c2:
+        school = st.text_input("School", placeholder="Your school")
 
-    col1, col2 = st.columns(2, gap="small")
-    with col1:
+    c3, c4 = st.columns(2, gap="small")
+    with c3:
         age = st.slider("Age", min_value=5, max_value=100, value=16)
-    with col2:
-        favorite_subject = st.text_input(
-            "Favorite subject",
-            placeholder="e.g. Science",
-        )
+    with c4:
+        favorite_subject = st.text_input("Favorite subject", placeholder="e.g. Science")
 
     hobby = st.text_input("Favorite hobby", placeholder="e.g. Chess")
-
     trimmed_name = name.strip()
 
     required_fields = [
-        ("Name", bool(trimmed_name)),
-        ("School", bool(school.strip())),
-        ("Favorite subject", bool(favorite_subject.strip())),
-        ("Favorite hobby", bool(hobby.strip())),
+        bool(trimmed_name),
+        bool(school.strip()),
+        bool(favorite_subject.strip()),
+        bool(hobby.strip()),
     ]
-
-    done_count = sum(1 for _, is_done in required_fields if is_done)
-    all_filled = done_count == len(required_fields)
-    pct = round((done_count / len(required_fields)) * 100)
+    done_count = sum(required_fields)
+    all_filled = done_count == 4
+    pct = round(done_count / 4 * 100)
 
     st.markdown(
-        f"""
+        textwrap.dedent(f"""
         <div class="profile-progress-mini">
             <span>Profile setup</span>
-            <div class="profile-progress-line">
-                <span style="width:{pct}%"></span>
-            </div>
-            <span>{done_count}/{len(required_fields)}</span>
+            <div class="profile-progress-line"><span style="width:{pct}%"></span></div>
+            <span>{done_count}/4</span>
         </div>
-        """,
+        """),
         unsafe_allow_html=True,
     )
 
-    continue_clicked = st.button(
-        "Continue",
-        use_container_width=True,
-        type="primary",
-        disabled=not all_filled,
-    )
+    continue_clicked = st.button("Continue", use_container_width=True, type="primary", disabled=not all_filled)
 
-    st.markdown(
-        """
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    st.markdown('</div></div>', unsafe_allow_html=True)
 
     @st.dialog("Profile created")
     def show_profile_popup():
@@ -1862,19 +1592,14 @@ if not st.session_state.profile_complete:
         st.write(f"**Favorite subject** — {favorite_subject}")
         st.write(f"**Favorite hobby** — {hobby}")
         st.markdown("---")
-
         if st.button("Done", use_container_width=True, type="primary"):
             st.rerun()
 
     if continue_clicked:
-        if name and school and favorite_subject and hobby:
-            st.session_state.profile_name = trimmed_name
-            st.session_state.profile_complete = True
-            show_profile_popup()
-        else:
-            st.warning("Fill in every field to continue.")
+        st.session_state.profile_name = trimmed_name
+        st.session_state.profile_complete = True
+        show_profile_popup()
 
-    st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
     st.stop()
 
 trimmed_name = st.session_state.profile_name
