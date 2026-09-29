@@ -742,6 +742,176 @@ html, body, .stApp,
     }
 }
 
+/* ---------- profile success popup ---------- */
+@keyframes profileSuccessIn {
+    0% { opacity: 0; transform: translateY(18px) scale(.94); }
+    55% { opacity: 1; transform: translateY(-3px) scale(1.015); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes profileRing {
+    0% { transform: scale(.45); opacity: 0; }
+    55% { transform: scale(1.08); opacity: .35; }
+    100% { transform: scale(1); opacity: 0; }
+}
+
+@keyframes profileCheck {
+    0% { stroke-dashoffset: 80; opacity: 0; }
+    45% { opacity: 1; }
+    100% { stroke-dashoffset: 0; opacity: 1; }
+}
+
+@keyframes profileFloat {
+    0%, 100% { transform: translateY(0) rotate(-1deg); }
+    50% { transform: translateY(-7px) rotate(1deg); }
+}
+
+.profile-success-card {
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    padding: 8px 4px 4px;
+    animation: profileSuccessIn .55s cubic-bezier(.22,1,.36,1) both;
+}
+
+.profile-success-card::before {
+    content: "";
+    position: absolute;
+    width: 210px;
+    height: 210px;
+    left: 50%;
+    top: 22px;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(10,132,255,.18), transparent 68%);
+    pointer-events: none;
+}
+
+.profile-success-art {
+    position: relative;
+    width: 150px;
+    height: 120px;
+    margin: 0 auto 2px;
+    animation: profileFloat 3.8s ease-in-out infinite;
+}
+
+.profile-success-art img {
+    width: 150px;
+    height: 120px;
+    object-fit: contain;
+    filter: drop-shadow(0 18px 24px rgba(0,0,0,.28));
+}
+
+.profile-success-check {
+    position: absolute;
+    right: 2px;
+    bottom: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(145deg, #34c759, #20a94b);
+    border: 4px solid rgba(30,30,32,.92);
+    box-shadow: 0 10px 26px rgba(52,199,89,.28);
+}
+
+.profile-success-check::before {
+    content: "";
+    position: absolute;
+    inset: -8px;
+    border: 2px solid rgba(52,199,89,.4);
+    border-radius: 50%;
+    animation: profileRing 1.1s ease-out .2s both;
+}
+
+.profile-success-check svg {
+    width: 22px;
+    height: 22px;
+}
+
+.profile-success-check path {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 80;
+    stroke-dashoffset: 80;
+    animation: profileCheck .65s cubic-bezier(.65,0,.35,1) .28s forwards;
+}
+
+.profile-success-kicker {
+    color: #3d9dff;
+    font-size: .74rem;
+    font-weight: 800;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    margin: 2px 0 8px;
+}
+
+.profile-success-title {
+    color: #fff;
+    font-size: 1.8rem;
+    font-weight: 760;
+    letter-spacing: -.04em;
+    line-height: 1.05;
+    margin-bottom: 8px;
+}
+
+.profile-success-text {
+    color: rgba(235,235,245,.58);
+    font-size: .88rem;
+    line-height: 1.45;
+    max-width: 320px;
+    margin: 0 auto 18px;
+}
+
+.profile-success-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 0 auto 6px;
+    max-width: 360px;
+}
+
+.profile-success-detail {
+    padding: 10px 12px;
+    text-align: left;
+    border-radius: 13px;
+    border: 1px solid rgba(255,255,255,.09);
+    background: rgba(255,255,255,.045);
+}
+
+.profile-success-detail span {
+    display: block;
+    color: rgba(235,235,245,.38);
+    font-size: .65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: 3px;
+}
+
+.profile-success-detail strong {
+    display: block;
+    color: rgba(255,255,255,.92);
+    font-size: .8rem;
+    font-weight: 650;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+[data-testid="stDialog"] [data-testid="stDialogContent"] {
+    padding-top: 0 !important;
+}
+
+@media (max-width: 520px) {
+    .profile-success-title { font-size: 1.55rem; }
+    .profile-success-details { grid-template-columns: 1fr; }
+}
+
 /* ---------- chrome ---------- */
 #MainMenu, footer { visibility: hidden; }
 
@@ -1583,16 +1753,55 @@ if not st.session_state.profile_complete:
 
     st.markdown('</div></div>', unsafe_allow_html=True)
 
-    @st.dialog("Profile created")
+    @st.dialog("")
     def show_profile_popup():
-        st.subheader(f"Welcome, {name}")
-        st.markdown("---")
-        st.write(f"**Age** — {age}")
-        st.write(f"**School** — {school}")
-        st.write(f"**Favorite subject** — {favorite_subject}")
-        st.write(f"**Favorite hobby** — {hobby}")
-        st.markdown("---")
-        if st.button("Done", use_container_width=True, type="primary"):
+        safe_name = _escape(name.strip())
+        safe_school = _escape(school.strip())
+        safe_subject = _escape(favorite_subject.strip())
+        safe_hobby = _escape(hobby.strip())
+
+        st.markdown(
+            textwrap.dedent(f"""
+            <div class="profile-success-card">
+                <div class="profile-success-art">
+                    <img src="{profile_picture}" alt="Essentials student illustration" />
+                    <div class="profile-success-check" aria-hidden="true">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M5 12.5 9.5 17 19 7.5" />
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="profile-success-kicker">Essentials • Profile ready</div>
+                <div class="profile-success-title">Welcome, {safe_name}!</div>
+                <div class="profile-success-text">
+                    Your student workspace is ready. Everything is set up and waiting for you.
+                </div>
+
+                <div class="profile-success-details">
+                    <div class="profile-success-detail">
+                        <span>School</span>
+                        <strong>{safe_school}</strong>
+                    </div>
+                    <div class="profile-success-detail">
+                        <span>Age</span>
+                        <strong>{age} years old</strong>
+                    </div>
+                    <div class="profile-success-detail">
+                        <span>Favorite subject</span>
+                        <strong>{safe_subject}</strong>
+                    </div>
+                    <div class="profile-success-detail">
+                        <span>Favorite hobby</span>
+                        <strong>{safe_hobby}</strong>
+                    </div>
+                </div>
+            </div>
+            """),
+            unsafe_allow_html=True,
+        )
+
+        if st.button("Enter Essentials", use_container_width=True, type="primary"):
             st.rerun()
 
     if continue_clicked:
