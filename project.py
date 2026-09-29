@@ -304,6 +304,15 @@ div[data-testid="stHorizontalBlock"]:has(.st-key-profile_gate) > div[data-testid
     flex: 1;
 }
 
+/* profile_login now holds two stacked children (the fields card, then the
+   Continue button) instead of just the card, so it needs an explicit
+   column direction — plain `display:flex` defaults to row, which would
+   place the button beside the card instead of under it. */
+.st-key-profile_login {
+    flex-direction: column;
+    gap: 14px;
+}
+
 .st-key-profile_gate [data-testid="stVerticalBlockBorderWrapper"] {
     flex: 1;
     display: flex;
@@ -1111,6 +1120,124 @@ hr { margin: var(--s-5) 0 !important; }
     to   { opacity: 1; transform: none; }
 }
 
+/* ---------- profile: refined login card ---------- */
+
+.login-section-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 500;
+    margin: 6px 0 14px 0;
+}
+.login-section-label::before,
+.login-section-label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--hairline);
+}
+
+/* Age slider: recolor Streamlit's default red/orange thumb + track to blue. */
+div[data-testid="stSlider"] [role="slider"] {
+    background-color: var(--blue) !important;
+    border-color: var(--blue) !important;
+    box-shadow: 0 2px 10px rgba(10, 132, 255, 0.5) !important;
+}
+div[data-testid="stSlider"] [data-baseweb="slider"] > div > div {
+    background: var(--blue) !important;
+}
+div[data-testid="stSlider"] [data-testid="stTickBarMin"],
+div[data-testid="stSlider"] [data-testid="stTickBarMax"] {
+    color: var(--muted) !important;
+}
+div[data-testid="stThumbValue"] {
+    color: var(--label) !important;
+    background: rgba(10, 132, 255, 0.22) !important;
+}
+div[data-testid="stSlider"] label { color: var(--muted) !important; }
+
+.login-avatar-wrap { position: relative; }
+
+.login-avatar {
+    width: 96px;
+    height: 96px;
+    font-size: 2.3rem;
+    animation: avatarPop 0.5s var(--spring-soft);
+}
+
+.login-avatar-ring {
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(10, 132, 255, 0.45);
+    animation: ringPulse 2.6s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.login-subtext.login-hint {
+    margin-top: 2px;
+    max-width: 26ch;
+}
+
+@keyframes avatarPop {
+    from { opacity: 0; transform: scale(0.7); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes ringPulse {
+    0%, 100% { opacity: 0.55; transform: scale(1); }
+    50%      { opacity: 0.15; transform: scale(1.08); }
+}
+
+/* Progress ring replacing the static lock icon on the status card. */
+.profile-progress-ring {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    margin: 2px auto 18px auto;
+    border-radius: 50%;
+    background: conic-gradient(var(--blue) calc(var(--pct) * 1%), rgba(255,255,255,0.09) 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.5s var(--ease-out);
+}
+.profile-progress-ring::before {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border-radius: 50%;
+    background: rgba(20, 20, 22, 0.92);
+}
+.profile-progress-ring span {
+    position: relative;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--label);
+}
+.profile-progress-ring.done {
+    background: var(--blue);
+}
+.profile-progress-ring.done svg {
+    position: relative;
+    width: 26px;
+    height: 26px;
+    color: #ffffff;
+}
+
+.profile-gate-checklist { width: 100%; max-width: 230px; margin: 0 auto; }
+
+.profile-gate-row svg { transition: transform 0.2s ease; }
+.profile-gate-row.done svg { animation: checkPop 0.4s var(--spring); }
+
+@keyframes checkPop {
+    from { transform: scale(0.4); }
+    to   { transform: scale(1); }
+}
+
 /* ---------- tablet ---------- */
 @media (min-width: 769px) and (max-width: 1099px) {
     .home-title { font-size: 2.2rem; }
@@ -1356,6 +1483,271 @@ components.html(
 )
 
 
+st.markdown(
+    """
+<style>
+/* ==========================================================
+   ESSENTIALS PROFILE — split login-page redesign
+   Keeps the existing dark / Apple-style Essentials theme.
+   ========================================================== */
+
+.profile-login-shell {
+    display: grid;
+    grid-template-columns: 0.95fr 1.05fr;
+    min-height: 610px;
+    margin: 8px auto 34px auto;
+    max-width: 900px;
+    overflow: hidden;
+    border-radius: 30px;
+    border: 1px solid rgba(255,255,255,0.13);
+    background: rgba(15, 17, 22, 0.78);
+    box-shadow: 0 30px 90px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.08);
+    backdrop-filter: blur(36px) saturate(150%);
+    -webkit-backdrop-filter: blur(36px) saturate(150%);
+}
+.profile-brand-panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 0;
+    padding: 38px 38px 34px 38px;
+    overflow: hidden;
+    background:
+        radial-gradient(120% 90% at 15% 0%, rgba(61,157,255,0.24), transparent 55%),
+        radial-gradient(90% 80% at 100% 100%, rgba(10,132,255,0.12), transparent 60%),
+        rgba(255,255,255,0.035);
+    border-right: 1px solid rgba(255,255,255,0.10);
+}
+.profile-brand-panel::before,
+.profile-brand-panel::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+}
+.profile-brand-panel::before {
+    width: 230px; height: 230px; right: -90px; top: 90px;
+    background: rgba(10,132,255,0.10);
+    filter: blur(3px);
+}
+.profile-brand-panel::after {
+    width: 150px; height: 150px; left: -70px; bottom: 60px;
+    background: rgba(61,157,255,0.08);
+}
+.profile-brand {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+    font-size: 1.12rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+}
+.profile-brand-mark {
+    width: 34px; height: 34px;
+    display: grid; place-items: center;
+    border-radius: 10px;
+    background: linear-gradient(145deg, #3d9dff, #0a84ff);
+    box-shadow: 0 8px 24px rgba(10,132,255,0.34);
+    color: #fff;
+    font-size: 1.05rem;
+}
+.profile-brand-copy {
+    position: relative;
+    z-index: 1;
+    margin-top: auto;
+    margin-bottom: auto;
+    max-width: 330px;
+}
+.profile-brand-kicker {
+    color: #3d9dff;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+}
+.profile-brand-title {
+    color: #fff;
+    font-size: clamp(2.2rem, 4vw, 3.35rem);
+    font-weight: 750;
+    letter-spacing: -0.045em;
+    line-height: 0.98;
+    margin-bottom: 18px;
+}
+.profile-brand-text {
+    color: rgba(235,235,245,0.68);
+    font-size: 0.98rem;
+    line-height: 1.55;
+    max-width: 31ch;
+}
+.profile-illustration {
+    position: relative;
+    z-index: 1;
+    width: 210px; height: 190px;
+    margin: 34px auto 0 auto;
+}
+.profile-illustration .orb {
+    position: absolute;
+    width: 145px; height: 145px; left: 32px; top: 8px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 28%, rgba(61,157,255,0.75), rgba(10,132,255,0.18) 62%, transparent 70%);
+    box-shadow: 0 0 70px rgba(10,132,255,0.18);
+}
+.profile-illustration .cap {
+    position: absolute;
+    left: 42px; top: 43px;
+    width: 120px; height: 72px;
+    transform: rotate(-7deg);
+}
+.profile-illustration .cap-top {
+    position: absolute;
+    left: 12px; top: 5px;
+    width: 96px; height: 58px;
+    background: linear-gradient(145deg, #64b1ff, #0a84ff);
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    filter: drop-shadow(0 12px 16px rgba(10,132,255,0.24));
+}
+.profile-illustration .cap-base {
+    position: absolute;
+    left: 35px; top: 44px;
+    width: 52px; height: 25px;
+    border-radius: 0 0 12px 12px;
+    background: #1c4f91;
+}
+.profile-illustration .tassel {
+    position: absolute;
+    right: 0; top: 31px;
+    width: 40px; height: 3px;
+    border-radius: 10px;
+    background: #ff9f0a;
+    transform: rotate(27deg);
+    transform-origin: left center;
+}
+.profile-illustration .tassel::after {
+    content: "";
+    position: absolute;
+    right: -4px; top: -2px;
+    width: 8px; height: 22px;
+    border-radius: 0 0 5px 5px;
+    background: #ff9f0a;
+}
+.profile-brand-footer {
+    position: relative;
+    z-index: 1;
+    color: rgba(235,235,245,0.42);
+    font-size: 0.76rem;
+}
+.profile-form-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 48px 52px;
+    min-width: 0;
+    background: rgba(255,255,255,0.025);
+}
+.profile-form-heading { margin-bottom: 28px; }
+.profile-form-heading h2 {
+    color: #fff !important;
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.035em !important;
+    margin: 0 0 7px 0 !important;
+}
+.profile-form-heading p {
+    color: rgba(235,235,245,0.55) !important;
+    font-size: 0.9rem;
+    margin: 0;
+}
+.profile-form-panel .stTextInput label,
+.profile-form-panel .stSlider label {
+    color: rgba(235,235,245,0.62) !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+}
+.profile-form-panel .stTextInput input {
+    background: rgba(255,255,255,0.055) !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
+    border-radius: 12px !important;
+    color: #fff !important;
+}
+.profile-form-panel .stTextInput input::placeholder {
+    color: rgba(235,235,245,0.34) !important;
+}
+.profile-form-panel .stSlider { margin-top: 2px; }
+.profile-form-panel .stButton > button {
+    min-height: 50px !important;
+    border-radius: 13px !important;
+    margin-top: 8px;
+}
+.profile-form-panel .stButton > button[kind="primary"] {
+    background: linear-gradient(180deg, #3d9dff, #0a84ff) !important;
+}
+.profile-progress-mini {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 5px 0 22px 0;
+    color: rgba(235,235,245,0.42);
+    font-size: 0.74rem;
+}
+.profile-progress-line {
+    flex: 1;
+    height: 4px;
+    overflow: hidden;
+    border-radius: 99px;
+    background: rgba(255,255,255,0.08);
+}
+.profile-progress-line span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #0a84ff, #64b1ff);
+    transition: width 0.35s ease;
+}
+@media (max-width: 768px) {
+    .profile-login-shell {
+        grid-template-columns: 1fr;
+        min-height: auto;
+        margin-top: 4px;
+        border-radius: 24px;
+    }
+    .profile-brand-panel {
+        min-height: 310px;
+        padding: 26px 24px 24px;
+        border-right: none;
+        border-bottom: 1px solid rgba(255,255,255,0.10);
+    }
+    .profile-brand-copy { margin-top: 30px; margin-bottom: 0; }
+    .profile-brand-title { font-size: 2.15rem; }
+    .profile-brand-text { font-size: 0.9rem; }
+    .profile-illustration {
+        position: absolute;
+        right: -25px;
+        bottom: -24px;
+        width: 170px;
+        height: 155px;
+        transform: scale(0.8);
+        transform-origin: bottom right;
+        opacity: 0.82;
+    }
+    .profile-form-panel { padding: 30px 22px 26px; }
+    .profile-form-heading h2 { font-size: 1.7rem !important; }
+}
+@media (max-width: 420px) {
+    .profile-brand-panel { min-height: 285px; padding: 23px 20px; }
+    .profile-brand-title { font-size: 1.95rem; }
+    .profile-form-panel { padding: 26px 17px 22px; }
+}
+</style>
+    """,
+    unsafe_allow_html=True,
+)
+
 # ==========================================================
 # PROFILE
 # (only shown before sign-in — hidden from view once complete)
@@ -1367,121 +1759,103 @@ if "profile_name" not in st.session_state:
 if not st.session_state.profile_complete:
     st.markdown('<div id="profile" class="section-anchor"></div>', unsafe_allow_html=True)
 
-    st.title("Profile")
     st.markdown(
-        '<p class="lede">Sign in to set up your profile.</p>',
+        """
+        <div class="profile-login-shell">
+            <div class="profile-brand-panel">
+                <div class="profile-brand">
+                    <div class="profile-brand-mark">✦</div>
+                    <span>Essentials</span>
+                </div>
+
+                <div class="profile-brand-copy">
+                    <div class="profile-brand-kicker">Student workspace</div>
+                    <div class="profile-brand-title">Everything you need, in one place.</div>
+                    <div class="profile-brand-text">
+                        Set up your profile to unlock your calculator, grades,
+                        and quiz tools in a clean, personalized workspace.
+                    </div>
+
+                    <div class="profile-illustration" aria-hidden="true">
+                        <div class="orb"></div>
+                        <div class="cap">
+                            <div class="cap-top"></div>
+                            <div class="cap-base"></div>
+                            <div class="tassel"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-brand-footer">Your information stays in this session.</div>
+            </div>
+
+            <div class="profile-form-panel">
+                <div class="profile-form-heading">
+                    <h2>Welcome to Essentials</h2>
+                    <p>Log in by completing your student profile.</p>
+                </div>
+        """,
         unsafe_allow_html=True,
     )
 
-    PERSON_ICON = (
-        '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
-        '<circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.6"/>'
-        '<path d="M4.5 20c1.4-3.8 4.4-5.7 7.5-5.7s6.1 1.9 7.5 5.7" '
-        'stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
-        "</svg>"
-    )
-    LOCK_ICON = (
-        '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
-        '<rect x="5" y="10.5" width="14" height="10" rx="2.4" stroke="currentColor" stroke-width="1.6"/>'
-        '<path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
-        "</svg>"
-    )
-    CHECK_ICON = (
-        '<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">'
-        '<circle cx="10" cy="10" r="9" fill="var(--blue)"/>'
-        '<path d="M6 10.2l2.4 2.4L14 7.4" stroke="#fff" stroke-width="1.6" '
-        'stroke-linecap="round" stroke-linejoin="round"/>'
-        "</svg>"
-    )
-    PENDING_ICON = (
-        '<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">'
-        '<circle cx="10" cy="10" r="8.2" stroke="rgba(235,235,245,0.38)" stroke-width="1.4"/>'
-        "</svg>"
-    )
+    name = st.text_input("Name", placeholder="Enter your name")
+    school = st.text_input("School", placeholder="Enter your school")
 
-    # Status card on the left, the actual sign-in form on the right — a classic
-    # split-screen login layout instead of stacking the status below the form.
-    status_col, form_col = st.columns([1, 1.3], gap="large")
-
-    with form_col:
-        # Filled in further down, once the name field's value is known — this
-        # slot is what makes the avatar and greeting appear to sit above the form.
-        avatar_slot = st.empty()
-
-        with st.container(key="profile_login", border=True):
-            name = st.text_input("Name", placeholder="Your name")
-
-            st.markdown('<div class="login-divider"></div>', unsafe_allow_html=True)
-
-            age = st.number_input("Age", min_value=1, max_value=100, step=1)
-            school = st.text_input("School", placeholder="Your school")
-            favorite_subject = st.text_input("Favorite subject", placeholder="e.g. Science")
-            hobby = st.text_input("Favorite hobby", placeholder="e.g. Chess")
-
-            continue_clicked = st.button("Continue", use_container_width=True, type="primary")
-
-        trimmed_name = name.strip()
-
-        if trimmed_name:
-            avatar_html = f'<div class="login-avatar">{trimmed_name[0].upper()}</div>'
-            greeting_html = f'<div class="login-greeting">Welcome, {trimmed_name}</div>'
-        else:
-            avatar_html = f'<div class="login-avatar login-avatar-empty">{PERSON_ICON}</div>'
-            greeting_html = (
-                '<div class="login-greeting">Welcome</div>'
-                '<div class="login-subtext">Enter your name to continue</div>'
-            )
-
-        avatar_slot.markdown(
-            f'<div class="login-avatar-wrap">{avatar_html}{greeting_html}</div>',
-            unsafe_allow_html=True,
+    col1, col2 = st.columns(2, gap="small")
+    with col1:
+        age = st.slider("Age", min_value=5, max_value=100, value=16)
+    with col2:
+        favorite_subject = st.text_input(
+            "Favorite subject",
+            placeholder="e.g. Science",
         )
 
-    # Built from the form values above, so it has to come after form_col — but
-    # it still renders on the left, since column placement doesn't depend on
-    # code order.
+    hobby = st.text_input("Favorite hobby", placeholder="e.g. Chess")
+
+    trimmed_name = name.strip()
+
     required_fields = [
-        ("Name", bool(name.strip())),
+        ("Name", bool(trimmed_name)),
         ("School", bool(school.strip())),
         ("Favorite subject", bool(favorite_subject.strip())),
         ("Favorite hobby", bool(hobby.strip())),
     ]
-    all_filled = all(is_done for _, is_done in required_fields)
 
-    if all_filled:
-        status_icon = LOCK_ICON
-        status_title = "Ready to continue"
-        status_subtext = "Every field is filled in — press Continue to unlock the rest of the app."
-    else:
-        status_icon = LOCK_ICON
-        status_title = "Finish your profile to continue"
-        status_subtext = (
-            "Complete the fields on the right, then press Continue to unlock "
-            "the calculator, grades, and quiz sections."
-        )
+    done_count = sum(1 for _, is_done in required_fields if is_done)
+    all_filled = done_count == len(required_fields)
+    pct = round((done_count / len(required_fields)) * 100)
 
-    checklist_rows = "".join(
-        f'<div class="profile-gate-row{" done" if is_done else ""}">'
-        f'{CHECK_ICON if is_done else PENDING_ICON}<span>{field_label}</span></div>'
-        for field_label, is_done in required_fields
+    st.markdown(
+        f"""
+        <div class="profile-progress-mini">
+            <span>Profile setup</span>
+            <div class="profile-progress-line">
+                <span style="width:{pct}%"></span>
+            </div>
+            <span>{done_count}/{len(required_fields)}</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
-    with status_col:
-        with st.container(key="profile_gate", border=True):
-            st.markdown(
-                f"""
-                <div class="profile-gate-icon">{status_icon}</div>
-                <div class="profile-gate-title">{status_title}</div>
-                <p class="profile-gate-subtext">{status_subtext}</p>
-                <div class="profile-gate-checklist">{checklist_rows}</div>
-                """,
-                unsafe_allow_html=True,
-            )
+    continue_clicked = st.button(
+        "Continue",
+        use_container_width=True,
+        type="primary",
+        disabled=not all_filled,
+    )
+
+    st.markdown(
+        """
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     @st.dialog("Profile created")
     def show_profile_popup():
         st.subheader(f"Welcome, {name}")
-
         st.markdown("---")
         st.write(f"**Age** — {age}")
         st.write(f"**School** — {school}")
@@ -1494,9 +1868,6 @@ if not st.session_state.profile_complete:
 
     if continue_clicked:
         if name and school and favorite_subject and hobby:
-            # Saved here so the Home welcome text still has a name to show
-            # on every later rerun, even though this whole section — and
-            # the local `name` variable — stops being rendered after this.
             st.session_state.profile_name = trimmed_name
             st.session_state.profile_complete = True
             show_profile_popup()
@@ -1504,7 +1875,6 @@ if not st.session_state.profile_complete:
             st.warning("Fill in every field to continue.")
 
     st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
-
     st.stop()
 
 trimmed_name = st.session_state.profile_name
