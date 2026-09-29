@@ -1196,17 +1196,26 @@ profile_nav_item = (
 )
 nav_column_count = 4 if st.session_state.profile_complete else 5
 
+nav_items = "".join(
+    item
+    for item in (
+        profile_nav_item,
+        nav_link("home", "Home"),
+        nav_link("calculator", "Calculator"),
+        nav_link("grading", "Grades"),
+        nav_link("quiz-maker", "Quiz"),
+    )
+    if item
+)
+
+# Built as one unindented line on purpose: Streamlit's markdown renderer
+# treats a run of lines indented 4+ spaces as a preformatted code block,
+# and an empty (whitespace-only) line — which profile_nav_item produces
+# once signed in — is exactly what triggers that. A single flat line of
+# HTML never qualifies, so it always renders as markup, not literal text.
 st.markdown(
-    f"""
-<div class="brand-mark">Essentials</div>
-<div class="navigation-bar" style="--nav-cols:{nav_column_count}">
-    {profile_nav_item}
-    {nav_link("home", "Home")}
-    {nav_link("calculator", "Calculator")}
-    {nav_link("grading", "Grades")}
-    {nav_link("quiz-maker", "Quiz")}
-</div>
-""",
+    f'<div class="brand-mark">Essentials</div>'
+    f'<div class="navigation-bar" style="--nav-cols:{nav_column_count}">{nav_items}</div>',
     unsafe_allow_html=True,
 )
 
