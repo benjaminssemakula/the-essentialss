@@ -1753,7 +1753,7 @@ if not st.session_state.profile_complete:
 
     st.markdown('</div></div>', unsafe_allow_html=True)
 
-    @st.dialog("")
+    @st.dialog("Profile ready")
     def show_profile_popup():
         safe_name = _escape(name.strip())
         safe_school = _escape(school.strip())
