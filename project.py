@@ -911,7 +911,7 @@ hr { margin: var(--s-5) 0 !important; }
 }
 
 /* ---------- navigation: five items ---------- */
-.navigation-bar { grid-template-columns: repeat(5, 1fr) !important; }
+.navigation-bar { grid-template-columns: repeat(var(--nav-cols, 5), 1fr) !important; }
 .navigation-link { transition: background 0.25s ease, transform 0.3s var(--spring), color 0.2s ease; }
 .navigation-link:active { transform: scale(0.93); }
 
@@ -1187,11 +1187,20 @@ def nav_link(anchor_id, label):
     return f'<span class="navigation-link navigation-link-locked">{label}</span>'
 
 
+# Once signed in, the Profile section is gone from the page entirely, so
+# its nav item goes with it — the segmented control just shifts to 4 items.
+profile_nav_item = (
+    ""
+    if st.session_state.profile_complete
+    else '<a class="navigation-link" href="#profile" data-smooth="profile">Profile</a>'
+)
+nav_column_count = 4 if st.session_state.profile_complete else 5
+
 st.markdown(
     f"""
 <div class="brand-mark">Essentials</div>
-<div class="navigation-bar">
-    <a class="navigation-link" href="#profile" data-smooth="profile">Profile</a>
+<div class="navigation-bar" style="--nav-cols:{nav_column_count}">
+    {profile_nav_item}
     {nav_link("home", "Home")}
     {nav_link("calculator", "Calculator")}
     {nav_link("grading", "Grades")}
@@ -1340,156 +1349,156 @@ components.html(
 
 # ==========================================================
 # PROFILE
+# (only shown before sign-in — hidden from view once complete)
 # ==========================================================
 
-st.markdown('<div id="profile" class="section-anchor"></div>', unsafe_allow_html=True)
+if "profile_name" not in st.session_state:
+    st.session_state.profile_name = ""
 
-st.title("Profile")
-st.markdown(
-    '<p class="lede">Sign in to set up your profile.</p>',
-    unsafe_allow_html=True,
-)
+if not st.session_state.profile_complete:
+    st.markdown('<div id="profile" class="section-anchor"></div>', unsafe_allow_html=True)
 
-PERSON_ICON = (
-    '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
-    '<circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.6"/>'
-    '<path d="M4.5 20c1.4-3.8 4.4-5.7 7.5-5.7s6.1 1.9 7.5 5.7" '
-    'stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
-    "</svg>"
-)
-LOCK_ICON = (
-    '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
-    '<rect x="5" y="10.5" width="14" height="10" rx="2.4" stroke="currentColor" stroke-width="1.6"/>'
-    '<path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
-    "</svg>"
-)
-CHECK_ICON = (
-    '<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">'
-    '<circle cx="10" cy="10" r="9" fill="var(--blue)"/>'
-    '<path d="M6 10.2l2.4 2.4L14 7.4" stroke="#fff" stroke-width="1.6" '
-    'stroke-linecap="round" stroke-linejoin="round"/>'
-    "</svg>"
-)
-PENDING_ICON = (
-    '<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">'
-    '<circle cx="10" cy="10" r="8.2" stroke="rgba(235,235,245,0.38)" stroke-width="1.4"/>'
-    "</svg>"
-)
-
-# Status card on the left, the actual sign-in form on the right — a classic
-# split-screen login layout instead of stacking the status below the form.
-status_col, form_col = st.columns([1, 1.3], gap="large")
-
-with form_col:
-    # Filled in further down, once the name field's value is known — this
-    # slot is what makes the avatar and greeting appear to sit above the form.
-    avatar_slot = st.empty()
-
-    with st.container(key="profile_login", border=True):
-        name = st.text_input("Name", placeholder="Your name")
-
-        st.markdown('<div class="login-divider"></div>', unsafe_allow_html=True)
-
-        age = st.number_input("Age", min_value=1, max_value=100, step=1)
-        school = st.text_input("School", placeholder="Your school")
-        favorite_subject = st.text_input("Favorite subject", placeholder="e.g. Science")
-        hobby = st.text_input("Favorite hobby", placeholder="e.g. Chess")
-
-        continue_clicked = st.button("Continue", use_container_width=True, type="primary")
-
-    trimmed_name = name.strip()
-
-    if trimmed_name:
-        avatar_html = f'<div class="login-avatar">{trimmed_name[0].upper()}</div>'
-        greeting_html = f'<div class="login-greeting">Welcome, {trimmed_name}</div>'
-    else:
-        avatar_html = f'<div class="login-avatar login-avatar-empty">{PERSON_ICON}</div>'
-        greeting_html = (
-            '<div class="login-greeting">Welcome</div>'
-            '<div class="login-subtext">Enter your name to continue</div>'
-        )
-
-    avatar_slot.markdown(
-        f'<div class="login-avatar-wrap">{avatar_html}{greeting_html}</div>',
+    st.title("Profile")
+    st.markdown(
+        '<p class="lede">Sign in to set up your profile.</p>',
         unsafe_allow_html=True,
     )
 
-# Built from the form values above, so it has to come after form_col — but
-# it still renders on the left, since column placement doesn't depend on
-# code order.
-required_fields = [
-    ("Name", bool(name.strip())),
-    ("School", bool(school.strip())),
-    ("Favorite subject", bool(favorite_subject.strip())),
-    ("Favorite hobby", bool(hobby.strip())),
-]
-all_filled = all(is_done for _, is_done in required_fields)
-
-if st.session_state.profile_complete:
-    status_icon = CHECK_ICON
-    status_title = "Profile complete"
-    status_subtext = (
-        f"Welcome, {trimmed_name or 'back'}. The calculator, grades, and "
-        "quiz sections are unlocked below."
+    PERSON_ICON = (
+        '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+        '<circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.6"/>'
+        '<path d="M4.5 20c1.4-3.8 4.4-5.7 7.5-5.7s6.1 1.9 7.5 5.7" '
+        'stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+        "</svg>"
     )
-elif all_filled:
-    status_icon = LOCK_ICON
-    status_title = "Ready to continue"
-    status_subtext = "Every field is filled in — press Continue to unlock the rest of the app."
-else:
-    status_icon = LOCK_ICON
-    status_title = "Finish your profile to continue"
-    status_subtext = (
-        "Complete the fields on the right, then press Continue to unlock "
-        "the calculator, grades, and quiz sections."
+    LOCK_ICON = (
+        '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">'
+        '<rect x="5" y="10.5" width="14" height="10" rx="2.4" stroke="currentColor" stroke-width="1.6"/>'
+        '<path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>'
+        "</svg>"
+    )
+    CHECK_ICON = (
+        '<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">'
+        '<circle cx="10" cy="10" r="9" fill="var(--blue)"/>'
+        '<path d="M6 10.2l2.4 2.4L14 7.4" stroke="#fff" stroke-width="1.6" '
+        'stroke-linecap="round" stroke-linejoin="round"/>'
+        "</svg>"
+    )
+    PENDING_ICON = (
+        '<svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">'
+        '<circle cx="10" cy="10" r="8.2" stroke="rgba(235,235,245,0.38)" stroke-width="1.4"/>'
+        "</svg>"
     )
 
-checklist_rows = "".join(
-    f'<div class="profile-gate-row{" done" if is_done else ""}">'
-    f'{CHECK_ICON if is_done else PENDING_ICON}<span>{field_label}</span></div>'
-    for field_label, is_done in required_fields
-)
+    # Status card on the left, the actual sign-in form on the right — a classic
+    # split-screen login layout instead of stacking the status below the form.
+    status_col, form_col = st.columns([1, 1.3], gap="large")
 
-with status_col:
-    with st.container(key="profile_gate", border=True):
-        st.markdown(
-            f"""
-            <div class="profile-gate-icon">{status_icon}</div>
-            <div class="profile-gate-title">{status_title}</div>
-            <p class="profile-gate-subtext">{status_subtext}</p>
-            <div class="profile-gate-checklist">{checklist_rows}</div>
-            """,
+    with form_col:
+        # Filled in further down, once the name field's value is known — this
+        # slot is what makes the avatar and greeting appear to sit above the form.
+        avatar_slot = st.empty()
+
+        with st.container(key="profile_login", border=True):
+            name = st.text_input("Name", placeholder="Your name")
+
+            st.markdown('<div class="login-divider"></div>', unsafe_allow_html=True)
+
+            age = st.number_input("Age", min_value=1, max_value=100, step=1)
+            school = st.text_input("School", placeholder="Your school")
+            favorite_subject = st.text_input("Favorite subject", placeholder="e.g. Science")
+            hobby = st.text_input("Favorite hobby", placeholder="e.g. Chess")
+
+            continue_clicked = st.button("Continue", use_container_width=True, type="primary")
+
+        trimmed_name = name.strip()
+
+        if trimmed_name:
+            avatar_html = f'<div class="login-avatar">{trimmed_name[0].upper()}</div>'
+            greeting_html = f'<div class="login-greeting">Welcome, {trimmed_name}</div>'
+        else:
+            avatar_html = f'<div class="login-avatar login-avatar-empty">{PERSON_ICON}</div>'
+            greeting_html = (
+                '<div class="login-greeting">Welcome</div>'
+                '<div class="login-subtext">Enter your name to continue</div>'
+            )
+
+        avatar_slot.markdown(
+            f'<div class="login-avatar-wrap">{avatar_html}{greeting_html}</div>',
             unsafe_allow_html=True,
         )
 
+    # Built from the form values above, so it has to come after form_col — but
+    # it still renders on the left, since column placement doesn't depend on
+    # code order.
+    required_fields = [
+        ("Name", bool(name.strip())),
+        ("School", bool(school.strip())),
+        ("Favorite subject", bool(favorite_subject.strip())),
+        ("Favorite hobby", bool(hobby.strip())),
+    ]
+    all_filled = all(is_done for _, is_done in required_fields)
 
-@st.dialog("Profile created")
-def show_profile_popup():
-    st.subheader(f"Welcome, {name}")
-
-    st.markdown("---")
-    st.write(f"**Age** — {age}")
-    st.write(f"**School** — {school}")
-    st.write(f"**Favorite subject** — {favorite_subject}")
-    st.write(f"**Favorite hobby** — {hobby}")
-    st.markdown("---")
-
-    if st.button("Done", use_container_width=True, type="primary"):
-        st.rerun()
-
-
-if continue_clicked:
-    if name and school and favorite_subject and hobby:
-        st.session_state.profile_complete = True
-        show_profile_popup()
+    if all_filled:
+        status_icon = LOCK_ICON
+        status_title = "Ready to continue"
+        status_subtext = "Every field is filled in — press Continue to unlock the rest of the app."
     else:
-        st.warning("Fill in every field to continue.")
+        status_icon = LOCK_ICON
+        status_title = "Finish your profile to continue"
+        status_subtext = (
+            "Complete the fields on the right, then press Continue to unlock "
+            "the calculator, grades, and quiz sections."
+        )
 
+    checklist_rows = "".join(
+        f'<div class="profile-gate-row{" done" if is_done else ""}">'
+        f'{CHECK_ICON if is_done else PENDING_ICON}<span>{field_label}</span></div>'
+        for field_label, is_done in required_fields
+    )
 
-st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
+    with status_col:
+        with st.container(key="profile_gate", border=True):
+            st.markdown(
+                f"""
+                <div class="profile-gate-icon">{status_icon}</div>
+                <div class="profile-gate-title">{status_title}</div>
+                <p class="profile-gate-subtext">{status_subtext}</p>
+                <div class="profile-gate-checklist">{checklist_rows}</div>
+                """,
+                unsafe_allow_html=True,
+            )
 
-if not st.session_state.profile_complete:
+    @st.dialog("Profile created")
+    def show_profile_popup():
+        st.subheader(f"Welcome, {name}")
+
+        st.markdown("---")
+        st.write(f"**Age** — {age}")
+        st.write(f"**School** — {school}")
+        st.write(f"**Favorite subject** — {favorite_subject}")
+        st.write(f"**Favorite hobby** — {hobby}")
+        st.markdown("---")
+
+        if st.button("Done", use_container_width=True, type="primary"):
+            st.rerun()
+
+    if continue_clicked:
+        if name and school and favorite_subject and hobby:
+            # Saved here so the Home welcome text still has a name to show
+            # on every later rerun, even though this whole section — and
+            # the local `name` variable — stops being rendered after this.
+            st.session_state.profile_name = trimmed_name
+            st.session_state.profile_complete = True
+            show_profile_popup()
+        else:
+            st.warning("Fill in every field to continue.")
+
+    st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
+
     st.stop()
+
+trimmed_name = st.session_state.profile_name
 
 
 # ==========================================================
