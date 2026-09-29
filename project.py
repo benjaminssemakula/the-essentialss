@@ -810,6 +810,372 @@ html, body, .stApp,
 
 
 # ==========================================================
+# SPACING, BUTTON FEEL, NAV, HOME  (Apple-style additions)
+# ==========================================================
+
+from html import escape as _escape
+
+st.markdown(
+    """
+<style>
+
+/* ---------- spacing scale ---------- */
+:root {
+    --s-1: 8px;  --s-2: 12px; --s-3: 16px;
+    --s-4: 24px; --s-5: 40px; --s-6: 64px;
+    --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --spring-soft: cubic-bezier(0.22, 1.25, 0.36, 1);
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.block-container { padding: 40px 28px 96px 28px !important; }
+
+[data-testid="stVerticalBlock"]   { gap: var(--s-3); }
+[data-testid="stHorizontalBlock"] { gap: var(--s-3); }
+
+[data-testid="stVerticalBlockBorderWrapper"] {
+    padding: var(--s-4) !important;
+    margin-bottom: var(--s-2) !important;
+}
+
+/* Tighter, even keypad rhythm. */
+.st-key-calc_keys, .st-key-calc_keys [data-testid="stVerticalBlock"],
+.st-key-sci_keys,  .st-key-sci_keys  [data-testid="stVerticalBlock"] { gap: 10px; }
+.st-key-calc_keys [data-testid="stHorizontalBlock"],
+.st-key-sci_keys  [data-testid="stHorizontalBlock"] { gap: 10px; }
+
+.stApp h1 { margin: 0 0 6px 0 !important; padding: 0 !important; }
+.stApp h2, .stApp h3 { margin: 0 !important; padding: 0 0 4px 0 !important; }
+.lede { margin: 0 0 var(--s-4) 0 !important; }
+hr { margin: var(--s-5) 0 !important; }
+.section-gap { height: var(--s-6); }
+
+.stTextInput input, .stNumberInput input { min-height: 48px; }
+.stTextInput label, .stNumberInput label,
+.stSelectbox label, .stRadio label { margin-bottom: 6px !important; }
+.stRadio [role="radiogroup"] { gap: var(--s-2); }
+
+/* ---------- buttons: springy, tactile ---------- */
+.stButton > button {
+    position: relative;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    will-change: transform;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 2px 8px rgba(0,0,0,0.22);
+    transition:
+        transform 0.36s var(--spring),
+        background 0.2s ease,
+        box-shadow 0.28s ease,
+        filter 0.2s ease;
+}
+
+@media (hover: hover) {
+    .stButton > button:hover {
+        transform: translateY(-1px) scale(1.018);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 8px 22px rgba(0,0,0,0.32);
+    }
+}
+
+/* Press: sinks in fast, then springs back slowly on release. */
+.stButton > button:active {
+    transform: scale(0.93) !important;
+    filter: brightness(0.9);
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.3), 0 0 0 rgba(0,0,0,0) !important;
+    transition-duration: 0.07s, 0.07s, 0.07s, 0.07s;
+}
+
+.stButton > button[kind="primary"] {
+    background: linear-gradient(180deg, var(--blue-hi) 0%, var(--blue) 100%) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.32), 0 8px 24px rgba(10,132,255,0.42);
+}
+@media (hover: hover) {
+    .stButton > button[kind="primary"]:hover {
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.36), 0 12px 32px rgba(10,132,255,0.56);
+    }
+}
+
+/* Calculator keys: chunkier press. */
+.st-key-calc_keys .stButton > button:active,
+.st-key-sci_keys  .stButton > button:active {
+    transform: scale(0.88) !important;
+    background: rgba(255,255,255,0.3) !important;
+}
+.st-key-divide .stButton > button:active, .st-key-multiply .stButton > button:active,
+.st-key-minus  .stButton > button:active, .st-key-plus     .stButton > button:active,
+.st-key-equals .stButton > button:active {
+    background: var(--orange-hi) !important;
+}
+.st-key-equals .stButton > button {
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 6px 20px rgba(255,159,10,0.4);
+}
+
+/* ---------- navigation: five items ---------- */
+.navigation-bar { grid-template-columns: repeat(5, 1fr) !important; }
+.navigation-link { transition: background 0.25s ease, transform 0.3s var(--spring), color 0.2s ease; }
+.navigation-link:active { transform: scale(0.93); }
+
+/* ---------- home ---------- */
+.home-hero { margin: 0 0 var(--s-4) 0; }
+.home-title {
+    font-size: 2.6rem;
+    font-weight: 700;
+    letter-spacing: -0.032em;
+    line-height: 1.08;
+    color: var(--label);
+    max-width: 22ch;
+}
+.home-title span { color: var(--muted); }
+
+.portals {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    padding: 14px 0 22px 0;
+}
+
+.portal {
+    --fg: #ffffff;
+    --fg-soft: rgba(255,255,255,0.72);
+    --accent: var(--blue-hi);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 500px;
+    padding: 28px 26px 0 26px;
+    border-radius: 28px;
+    overflow: hidden;
+    background: #000000;
+    border: 1px solid var(--hairline);
+    color: var(--fg) !important;
+    text-decoration: none !important;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    will-change: transform;
+    transition:
+        transform 0.55s var(--spring-soft),
+        box-shadow 0.5s ease,
+        opacity 0.4s ease,
+        filter 0.4s ease;
+    animation: portalIn 0.8s var(--ease-out) backwards;
+    animation-delay: calc(var(--i) * 110ms);
+}
+
+.portal.light {
+    --fg: #1d1d1f;
+    --fg-soft: rgba(29,29,31,0.66);
+    --accent: #0071e3;
+    background: #f5f5f7;
+}
+
+.portal-eyebrow {
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--orange);
+}
+.portal.light .portal-eyebrow { color: #b64400; }
+
+.portal-title {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+    margin: 8px 0 12px 0;
+    color: var(--fg);
+}
+
+.portal-copy {
+    font-size: 0.98rem;
+    font-weight: 600;
+    line-height: 1.38;
+    color: var(--fg);
+}
+.portal-sub {
+    margin-top: 6px;
+    font-size: 0.95rem;
+    line-height: 1.38;
+    color: var(--fg-soft);
+}
+
+.portal-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 16px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--accent);
+}
+.portal-cta i {
+    font-style: normal;
+    display: inline-block;
+    transition: transform 0.4s var(--spring);
+}
+
+.portal-art {
+    margin-top: auto;
+    padding-top: 24px;
+    display: flex;
+    justify-content: center;
+    transition: transform 0.6s var(--spring-soft);
+}
+
+/* Calculator art */
+.art-calc {
+    width: 84%;
+    height: 236px;
+    padding: 16px 16px 0 16px;
+    overflow: hidden;
+    background: #1c1c1e;
+    border: 1px solid var(--hairline-hi);
+    border-bottom: none;
+    border-radius: 28px 28px 0 0;
+    box-shadow: 0 -10px 40px rgba(10,132,255,0.16);
+}
+.art-calc .read {
+    text-align: right;
+    font-size: 1.9rem;
+    font-weight: 300;
+    letter-spacing: -0.03em;
+    padding-bottom: 12px;
+}
+.art-calc .keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.art-calc .keys i {
+    font-style: normal;
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    font-size: 0.92rem;
+    background: rgba(255,255,255,0.14);
+}
+.art-calc .keys i.op { background: var(--orange); }
+
+/* Grades art */
+.art-grades {
+    width: 100%;
+    height: 236px;
+    margin-bottom: 26px;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+.art-grades .gpa { font-size: 3.6rem; font-weight: 700; letter-spacing: -0.045em; line-height: 1; }
+.art-grades .gpa-label { font-size: 0.86rem; color: var(--fg-soft); margin: 4px 0 16px 0; }
+.art-grades .bars { display: flex; align-items: flex-end; gap: 10px; height: 104px; }
+.art-grades .bars b {
+    flex: 1;
+    border-radius: 10px 10px 4px 4px;
+    background: linear-gradient(180deg, #3d9dff, #0a84ff);
+}
+
+/* Quiz art */
+.art-quiz {
+    width: 100%;
+    height: 236px;
+    margin-bottom: 26px;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 10px;
+}
+.art-quiz .q { font-size: 1.02rem; font-weight: 600; margin-bottom: 4px; }
+.art-quiz .a {
+    padding: 13px 16px;
+    border-radius: 14px;
+    font-size: 0.92rem;
+    background: rgba(255,255,255,0.11);
+}
+.art-quiz .a.on { background: var(--blue); }
+
+/* The bubble: hovered card grows, its neighbours quietly step back. */
+@media (hover: hover) {
+    .portals:hover .portal:not(:hover) {
+        opacity: 0.72;
+        transform: scale(0.972);
+        filter: saturate(0.8);
+    }
+    .portals .portal:hover {
+        transform: translateY(-8px) scale(1.05);
+        box-shadow: 0 34px 80px rgba(0,0,0,0.55), 0 0 0 1px var(--hairline-hi);
+        z-index: 3;
+    }
+    .portal:hover .portal-art { transform: translateY(-8px); }
+    .portal:hover .portal-cta i { transform: translateX(5px); }
+}
+.portal:active { transform: scale(0.975) !important; transition-duration: 0.12s; }
+.portal:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(10,132,255,0.55); }
+
+@keyframes portalIn {
+    from { opacity: 0; transform: translateY(32px) scale(0.95); }
+    to   { opacity: 1; transform: none; }
+}
+
+/* ---------- tablet ---------- */
+@media (min-width: 769px) and (max-width: 1099px) {
+    .home-title { font-size: 2.2rem; }
+    .portal { min-height: 470px; padding: 24px 20px 0 20px; }
+    .portal-title { font-size: 1.6rem; }
+}
+
+/* ---------- mobile ---------- */
+@media (max-width: 768px) {
+    :root { --s-4: 18px; --s-5: 28px; --s-6: 44px; }
+
+    .block-container { padding: 20px 14px 72px 14px !important; }
+    [data-testid="stVerticalBlockBorderWrapper"] { padding: var(--s-3) !important; }
+
+    .navigation-link { font-size: 0.66rem !important; padding: 9px 1px !important; }
+
+    .home-title { font-size: 1.9rem; }
+
+    /* Swipeable carousel, like the App Store. */
+    .portals {
+        display: flex;
+        gap: 14px;
+        margin: 0 -14px;
+        padding: 10px 14px 24px 14px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .portals::-webkit-scrollbar { display: none; }
+    .portal { flex: 0 0 80%; min-height: 450px; scroll-snap-align: center; }
+    .portal-title { font-size: 1.75rem; }
+}
+
+@media (max-width: 420px) {
+    .navigation-link { font-size: 0.6rem !important; }
+    .portal { flex-basis: 84%; }
+}
+
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
+# Haptic tick on every button / portal press (Android; iOS ignores vibrate).
+components.html(
+    """
+<script>
+(function () {
+    const doc = window.parent.document;
+    if (doc.__feelV1) return;
+    doc.__feelV1 = true;
+    doc.addEventListener('pointerdown', function (e) {
+        const hit = e.target && e.target.closest ? e.target.closest('button, a.portal') : null;
+        const nav = window.parent.navigator;
+        if (hit && !hit.disabled && nav.vibrate) nav.vibrate(hit.matches('a.portal') ? 12 : 8);
+    }, true);
+})();
+</script>
+""",
+    height=0,
+)
+
+
+# ==========================================================
 # NAVIGATION
 # ==========================================================
 
@@ -826,6 +1192,7 @@ st.markdown(
 <div class="brand-mark">Essentials</div>
 <div class="navigation-bar">
     <a class="navigation-link" href="#profile" data-smooth="profile">Profile</a>
+    {nav_link("home", "Home")}
     {nav_link("calculator", "Calculator")}
     {nav_link("grading", "Grades")}
     {nav_link("quiz-maker", "Quiz")}
@@ -1123,6 +1490,78 @@ st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
 
 if not st.session_state.profile_complete:
     st.stop()
+
+
+# ==========================================================
+# HOME  (Apple-style portal grid, shown right after login)
+# ==========================================================
+
+st.markdown('<div id="home" class="section-anchor"></div>', unsafe_allow_html=True)
+
+_who = _escape(trimmed_name) if trimmed_name else "there"
+
+_calc_keys = ["7", "8", "9", "÷", "4", "5", "6", "×", "1", "2", "3", "−"]
+_calc_art = (
+    '<div class="portal-art"><div class="art-calc"><div class="read">1,024</div><div class="keys">'
+    + "".join(f'<i class="{"op" if n % 4 == 3 else ""}">{k}</i>' for n, k in enumerate(_calc_keys))
+    + "</div></div></div>"
+)
+_grades_art = (
+    '<div class="portal-art art-grades"><div class="gpa">3.82</div>'
+    '<div class="gpa-label">Overall GPA</div><div class="bars">'
+    + "".join(f'<b style="height:{h}%"></b>' for h in (44, 62, 52, 78, 94))
+    + "</div></div>"
+)
+_quiz_art = (
+    '<div class="portal-art art-quiz"><div class="q">Which planet is closest to the Sun?</div>'
+    '<div class="a">A. Venus</div><div class="a on">B. Mercury</div><div class="a">C. Mars</div></div>'
+)
+
+
+def _portal(i, href, eyebrow, title, copy, sub, art, light=False):
+    return (
+        f'<a class="portal{" light" if light else ""}" href="#{href}" data-smooth="{href}" style="--i:{i}">'
+        f'<div class="portal-eyebrow">{eyebrow}</div>'
+        f'<div class="portal-title">{title}</div>'
+        f'<div class="portal-copy">{copy}</div>'
+        f'<div class="portal-sub">{sub}</div>'
+        f'<div class="portal-cta">Open <i>›</i></div>'
+        f"{art}</a>"
+    )
+
+
+st.markdown(
+    f'<div class="home-hero"><div class="home-title">Welcome, {_who}. '
+    f"<span>Pick where to go next.</span></div></div>"
+    '<div class="portals">'
+    + _portal(0, "calculator", "Scientific", "Calculator",
+              "Sums, roots, sin, cos and log in one keypad.",
+              "Results pop up in a clean sheet.", _calc_art)
+    + _portal(1, "grading", "Weighted GPA", "Grades",
+              "Turn scores and attendance into your GPA.",
+              "70% score, 30% attendance.", _grades_art, light=True)
+    + _portal(2, "quiz-maker", "Your questions", "Quiz",
+              "Write your own questions, then take the test.",
+              "Instant score when you finish.", _quiz_art)
+    + "</div>",
+    unsafe_allow_html=True,
+)
+
+if not st.session_state.get("home_seen"):
+    st.session_state.home_seen = True
+    components.html(
+        """
+<script>
+setTimeout(function () {
+    const el = window.parent.document.getElementById('home');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}, 350);
+</script>
+""",
+        height=0,
+    )
+
+st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
 
 
 # ==========================================================
