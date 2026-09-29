@@ -1760,46 +1760,28 @@ if not st.session_state.profile_complete:
         safe_subject = _escape(favorite_subject.strip())
         safe_hobby = _escape(hobby.strip())
 
-        st.markdown(
-            textwrap.dedent(f"""
-            <div class="profile-success-card">
-                <div class="profile-success-art">
-                    <img src="{profile_picture}" alt="Essentials student illustration" />
-                    <div class="profile-success-check" aria-hidden="true">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M5 12.5 9.5 17 19 7.5" />
-                        </svg>
-                    </div>
-                </div>
-
-                <div class="profile-success-kicker">Essentials • Profile ready</div>
-                <div class="profile-success-title">Welcome, {safe_name}!</div>
-                <div class="profile-success-text">
-                    Your student workspace is ready. Everything is set up and waiting for you.
-                </div>
-
-                <div class="profile-success-details">
-                    <div class="profile-success-detail">
-                        <span>School</span>
-                        <strong>{safe_school}</strong>
-                    </div>
-                    <div class="profile-success-detail">
-                        <span>Age</span>
-                        <strong>{age} years old</strong>
-                    </div>
-                    <div class="profile-success-detail">
-                        <span>Favorite subject</span>
-                        <strong>{safe_subject}</strong>
-                    </div>
-                    <div class="profile-success-detail">
-                        <span>Favorite hobby</span>
-                        <strong>{safe_hobby}</strong>
-                    </div>
-                </div>
-            </div>
-            """),
-            unsafe_allow_html=True,
+        # IMPORTANT: keep this HTML flat/unindented. Streamlit's Markdown parser
+        # can interpret indented multiline HTML as a code block inside dialogs.
+        popup_html = (
+            f'<div class="profile-success-card">'
+            f'<div class="profile-success-art">'
+            f'<img src="{profile_picture}" alt="Essentials student illustration" />'
+            f'<div class="profile-success-check" aria-hidden="true">'
+            f'<svg viewBox="0 0 24 24"><path d="M5 12.5 9.5 17 19 7.5" /></svg>'
+            f'</div>'
+            f'</div>'
+            f'<div class="profile-success-kicker">Essentials • Profile ready</div>'
+            f'<div class="profile-success-title">Welcome, {safe_name}!</div>'
+            f'<div class="profile-success-text">Your student workspace is ready. Everything is set up and waiting for you.</div>'
+            f'<div class="profile-success-details">'
+            f'<div class="profile-success-detail"><span>School</span><strong>{safe_school}</strong></div>'
+            f'<div class="profile-success-detail"><span>Age</span><strong>{age} years old</strong></div>'
+            f'<div class="profile-success-detail"><span>Favorite subject</span><strong>{safe_subject}</strong></div>'
+            f'<div class="profile-success-detail"><span>Favorite hobby</span><strong>{safe_hobby}</strong></div>'
+            f'</div>'
+            f'</div>'
         )
+        st.markdown(popup_html, unsafe_allow_html=True)
 
         if st.button("Enter Essentials", use_container_width=True, type="primary"):
             st.rerun()
