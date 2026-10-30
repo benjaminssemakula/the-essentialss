@@ -1,5 +1,6 @@
 import base64
 import math
+import random
 import textwrap
 import os
 from uuid import uuid4
@@ -2496,3 +2497,182 @@ if st.session_state.quiz_finished:
             st.rerun()
 
     show_quiz_result()
+
+
+# ==========================================================
+# GUESS THE NUMBER GAME
+# ==========================================================
+
+st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
+st.markdown("---")
+st.markdown('<div id="number-game" class="section-anchor"></div>', unsafe_allow_html=True)
+
+st.title("🎯 Guess the Number")
+st.markdown(
+    '<p class="lede">A secret number is waiting. Choose your difficulty, '
+    'set your attempts, and see if you can guess it.</p>',
+    unsafe_allow_html=True,
+)
+
+NUMBER_GAME_DIFFICULTIES = {
+    "Easy": (0, 10),
+    "Intermediate": (0, 50),
+    "Expert": (0, 100),
+    "Master": (0, 500),
+    "Legend": (0, 1000),
+}
+
+if "number_game_target" not in st.session_state:
+    st.session_state.number_game_target = None
+if "number_game_active" not in st.session_state:
+    st.session_state.number_game_active = False
+if "number_game_over" not in st.session_state:
+    st.session_state.number_game_over = False
+if "number_game_won" not in st.session_state:
+    st.session_state.number_game_won = False
+if "number_game_attempts_left" not in st.session_state:
+    st.session_state.number_game_attempts_left = 0
+if "number_game_attempts_used" not in st.session_state:
+    st.session_state.number_game_attempts_used = 0
+if "number_game_last_hint" not in st.session_state:
+    st.session_state.number_game_last_hint = ""
+if "number_game_config" not in st.session_state:
+    st.session_state.number_game_config = None
+
+game_settings_col, attempts_col = st.columns([1.35, 1])
+
+with game_settings_col:
+    selected_difficulty = st.selectbox(
+        "Difficulty",
+        list(NUMBER_GAME_DIFFICULTIES.keys()),
+        key="number_game_difficulty",
+    )
+
+with attempts_col:
+    selected_attempts = st.number_input(
+        "Attempts allowed",
+        min_value=1,
+        max_value=30,
+        value=5,
+        step=1,
+        key="number_game_attempt_limit",
+        help="Choose how many guesses you get before the game ends.",
+    )
+
+number_min, number_max = NUMBER_GAME_DIFFICULTIES[selected_difficulty]
+current_game_config = (selected_difficulty, int(selected_attempts))
+
+# Changing either setting prepares a fresh game, so attempts and old hints
+# from a previous difficulty cannot carry over.
+if st.session_state.number_game_config != current_game_config:
+    st.session_state.number_game_config = current_game_config
+    st.session_state.number_game_target = None
+    st.session_state.number_game_active = False
+    st.session_state.number_game_over = False
+    st.session_state.number_game_won = False
+    st.session_state.number_game_attempts_left = int(selected_attempts)
+    st.session_state.number_game_attempts_used = 0
+    st.session_state.number_game_last_hint = ""
+
+with st.container(border=True):
+    st.markdown(
+        f'<div style="text-align:center; padding:5px 0 12px;">'
+        f'<div style="font-size:.76rem; letter-spacing:.12em; text-transform:uppercase; '
+        f'font-weight:700; color:#3d9dff;">{selected_difficulty} mode</div>'
+        f'<div style="font-size:2.15rem; font-weight:750; letter-spacing:-.04em; '
+        f'color:#fff; margin:4px 0;">{number_min} – {number_max}</div>'
+        f'<div style="font-size:.86rem; color:rgba(235,235,245,.62);">'
+        f'Guess a whole number in this range</div></div>',
+        unsafe_allow_html=True,
+    )
+
+    info_col1, info_col2 = st.columns(2)
+    with info_col1:
+        st.metric("Attempts allowed", int(selected_attempts))
+    with info_col2:
+        st.metric(
+            "Attempts remaining",
+            st.session_state.number_game_attempts_left
+            if st.session_state.number_game_active
+            else int(selected_attempts),
+        )
+
+    start_game = st.button(
+        "🎮 Start / New Game",
+        use_container_width=True,
+        type="primary",
+        key="number_game_start",
+    )
+
+    if start_game:
+        st.session_state.number_game_target = random.randint(number_min, number_max)
+        st.session_state.number_game_active = True
+        st.session_state.number_game_over = False
+        st.session_state.number_game_won = False
+        st.session_state.number_game_attempts_left = int(selected_attempts)
+        st.session_state.number_game_attempts_used = 0
+        st.session_state.number_game_last_hint = ""
+        st.rerun()
+
+    if st.session_state.number_game_active and not st.session_state.number_game_over:
+        st.markdown("---")
+        guess = st.number_input(
+            f"Your guess ({number_min}–{number_max})",
+            min_value=number_min,
+            max_value=number_max,
+            value=number_min,
+            step=1,
+            key=f"number_game_guess_{selected_difficulty}",
+        )
+
+        submit_guess = st.button(
+            "Submit Guess",
+            use_container_width=True,
+            key="number_game_submit",
+        )
+
+        if submit_guess:
+            st.session_state.number_game_attempts_used += 1
+            st.session_state.number_game_attempts_left -= 1
+
+            if int(guess) == st.session_state.number_game_target:
+                st.session_state.number_game_won = True
+                st.session_state.number_game_over = True
+                st.session_state.number_game_active = False
+                st.session_state.number_game_last_hint = (
+                    f"🎉 Correct! You found {st.session_state.number_game_target} "
+                    f"in {st.session_state.number_game_attempts_used} "
+                    f"attempt(s)."
+                )
+            elif st.session_state.number_game_attempts_left <= 0:
+                st.session_state.number_game_over = True
+                st.session_state.number_game_active = False
+                st.session_state.number_game_last_hint = (
+                    f"Out of attempts! The secret number was "
+                    f"{st.session_state.number_game_target}."
+                )
+            elif int(guess) < st.session_state.number_game_target:
+                st.session_state.number_game_last_hint = (
+                    "Too low — try a higher number."
+                )
+            else:
+                st.session_state.number_game_last_hint = (
+                    "Too high — try a lower number."
+                )
+
+            st.rerun()
+
+    if st.session_state.number_game_last_hint:
+        if st.session_state.number_game_won:
+            st.success(st.session_state.number_game_last_hint)
+            st.balloons()
+        elif st.session_state.number_game_over:
+            st.error(st.session_state.number_game_last_hint)
+        elif st.session_state.number_game_active:
+            st.info(st.session_state.number_game_last_hint)
+
+    if not st.session_state.number_game_active and not st.session_state.number_game_over:
+        st.caption("Press **Start / New Game** to generate your secret number.")
+    elif st.session_state.number_game_over:
+        st.caption("Want another round? Press **Start / New Game**.")
+
