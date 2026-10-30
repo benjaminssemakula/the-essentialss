@@ -1518,6 +1518,157 @@ div[data-testid="stSlider"] label { color: var(--muted) !important; }
     .portal { flex-basis: 84%; }
 }
 
+/* ---------- home: all four portals in a single row ---------- */
+@media (min-width: 769px) {
+    .portals { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .portal,
+    .portal.light { min-height: 460px; padding: 24px 18px 0 18px; border-radius: 28px; }
+    .portal-eyebrow { font-size: 0.68rem; }
+    .portal-title { font-size: 1.5rem; margin: 6px 0 10px 0; }
+    .portal-copy { font-size: 0.88rem; }
+    .portal-sub { font-size: 0.82rem; }
+    .portal-cta { font-size: 0.88rem; margin-top: 12px; }
+
+    .art-calc { width: 100%; padding: 12px 12px 0 12px; }
+    .art-calc .read { font-size: 1.5rem; padding-bottom: 8px; }
+    .art-calc .keys { gap: 6px; }
+    .art-calc .keys i { font-size: 0.78rem; }
+    .art-grades .gpa { font-size: 3rem; }
+    .art-grades .bars { gap: 7px; }
+    .art-quiz .q { font-size: 0.88rem; }
+    .art-quiz .a { padding: 10px 12px; font-size: 0.8rem; }
+    .game-orbit { width: 110px; height: 110px; }
+    .game-number { font-size: 3.9rem; }
+    .game-range { width: 90%; }
+    .game-pills b { padding: 5px 7px; font-size: 0.56rem; }
+}
+
+/* ---------- number inputs: same curve as every other field ---------- */
+.stNumberInput [data-baseweb="input"],
+.stNumberInput [data-baseweb="base-input"] {
+    border-radius: var(--r-ctl) !important;
+}
+.stNumberInput [data-baseweb="input"] {
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.07) !important;
+    border: 1px solid var(--hairline) !important;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.stNumberInput [data-baseweb="input"]:focus-within {
+    border-color: var(--blue) !important;
+    box-shadow: 0 0 0 3.5px rgba(10, 132, 255, 0.28) !important;
+}
+.stNumberInput [data-baseweb="base-input"],
+.stNumberInput [data-baseweb="input"] input {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+}
+.stNumberInput button {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 0 !important;
+}
+.stNumberInput button:hover { background: rgba(255, 255, 255, 0.14) !important; }
+
+/* ---------- guess the number ---------- */
+.gtn-hud { text-align: center; padding: 4px 0 2px; }
+.gtn-eyebrow {
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--blue-hi);
+}
+.gtn-range {
+    margin: 6px 0 4px;
+    font-size: clamp(2.6rem, 6vw, 3.5rem);
+    font-weight: 750;
+    line-height: 1.05;
+    letter-spacing: -0.045em;
+    color: #ffffff;
+    font-variant-numeric: tabular-nums;
+}
+.gtn-range span { color: var(--muted); font-weight: 400; padding: 0 0.14em; }
+.gtn-sub { font-size: 0.9rem; color: var(--muted); }
+
+.gtn-meter {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: 20px 0 8px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+.gtn-meter b {
+    font-size: 0.95rem;
+    letter-spacing: -0.01em;
+    text-transform: none;
+    color: #ffffff;
+}
+.gtn-pips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+.gtn-pips i {
+    flex: 1 1 0;
+    min-width: 12px;
+    max-width: 56px;
+    height: 8px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.12);
+}
+.gtn-pips i.left {
+    background: linear-gradient(90deg, var(--blue-hi), var(--blue));
+    box-shadow: 0 0 12px rgba(10, 132, 255, 0.45);
+}
+
+.gtn-hint {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: var(--r-ctl);
+    border: 1px solid var(--hairline);
+    background: rgba(255, 255, 255, 0.05);
+}
+.gtn-hint .ic {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    font-size: 1.15rem;
+    font-weight: 700;
+    background: rgba(255, 159, 10, 0.18);
+    color: var(--orange-hi);
+}
+.gtn-hint strong { display: block; color: #ffffff; font-size: 1rem; letter-spacing: -0.01em; }
+.gtn-hint .t { color: var(--muted); font-size: 0.86rem; }
+.gtn-hint.win .ic  { background: rgba(48, 209, 88, 0.18); color: #30d158; }
+.gtn-hint.lose .ic { background: rgba(255, 69, 58, 0.18); color: #ff6961; }
+
+.gtn-history { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 6px; }
+.gtn-chip {
+    padding: 6px 12px;
+    border-radius: 99px;
+    border: 1px solid var(--hairline);
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    font-size: 0.84rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+.gtn-chip em { font-style: normal; margin-left: 5px; color: var(--orange-hi); }
+.gtn-chip.hit { border-color: rgba(48, 209, 88, 0.5); color: #30d158; }
+.gtn-chip.hit em { color: #30d158; }
+
+.gtn-idle { margin-top: 18px; text-align: center; font-size: 0.92rem; color: var(--muted); }
+
 </style>
 """,
     unsafe_allow_html=True,
@@ -2586,10 +2737,10 @@ st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
 st.markdown("---")
 st.markdown('<div id="number-game" class="section-anchor"></div>', unsafe_allow_html=True)
 
-st.title("🎯 Guess the Number")
+st.title("Guess the Number")
 st.markdown(
     '<p class="lede">A secret number is waiting. Choose your difficulty, '
-    'set your attempts, and see if you can guess it.</p>',
+    'set your attempts, and see if you can crack it.</p>',
     unsafe_allow_html=True,
 )
 
@@ -2601,157 +2752,181 @@ NUMBER_GAME_DIFFICULTIES = {
     "Legend": (0, 1000),
 }
 
-if "number_game_target" not in st.session_state:
-    st.session_state.number_game_target = None
-if "number_game_active" not in st.session_state:
-    st.session_state.number_game_active = False
-if "number_game_over" not in st.session_state:
-    st.session_state.number_game_over = False
-if "number_game_won" not in st.session_state:
-    st.session_state.number_game_won = False
-if "number_game_attempts_left" not in st.session_state:
-    st.session_state.number_game_attempts_left = 0
-if "number_game_attempts_used" not in st.session_state:
-    st.session_state.number_game_attempts_used = 0
-if "number_game_last_hint" not in st.session_state:
-    st.session_state.number_game_last_hint = ""
-if "number_game_config" not in st.session_state:
-    st.session_state.number_game_config = None
+_NUMBER_GAME_DEFAULTS = {
+    "number_game_target": None,
+    "number_game_active": False,
+    "number_game_over": False,
+    "number_game_won": False,
+    "number_game_attempts_left": 0,
+    "number_game_attempts_used": 0,
+    "number_game_hint_kind": "",
+    "number_game_history": [],
+    "number_game_celebrated": False,
+    "number_game_config": None,
+}
+for _key, _value in _NUMBER_GAME_DEFAULTS.items():
+    if _key not in st.session_state:
+        st.session_state[_key] = list(_value) if isinstance(_value, list) else _value
 
-game_settings_col, attempts_col = st.columns([1.35, 1])
 
-with game_settings_col:
-    selected_difficulty = st.selectbox(
-        "Difficulty",
-        list(NUMBER_GAME_DIFFICULTIES.keys()),
-        key="number_game_difficulty",
-    )
-
-with attempts_col:
-    selected_attempts = st.number_input(
-        "Attempts allowed",
-        min_value=1,
-        max_value=30,
-        value=5,
-        step=1,
-        key="number_game_attempt_limit",
-        help="Choose how many guesses you get before the game ends.",
-    )
-
-number_min, number_max = NUMBER_GAME_DIFFICULTIES[selected_difficulty]
-current_game_config = (selected_difficulty, int(selected_attempts))
-
-# Changing either setting prepares a fresh game, so attempts and old hints
-# from a previous difficulty cannot carry over.
-if st.session_state.number_game_config != current_game_config:
-    st.session_state.number_game_config = current_game_config
+def reset_number_game(attempts):
+    """Return the game to its idle state with a full set of attempts."""
     st.session_state.number_game_target = None
     st.session_state.number_game_active = False
     st.session_state.number_game_over = False
     st.session_state.number_game_won = False
-    st.session_state.number_game_attempts_left = int(selected_attempts)
+    st.session_state.number_game_attempts_left = int(attempts)
     st.session_state.number_game_attempts_used = 0
-    st.session_state.number_game_last_hint = ""
+    st.session_state.number_game_hint_kind = ""
+    st.session_state.number_game_history = []
+    st.session_state.number_game_celebrated = False
 
-with st.container(border=True):
-    st.markdown(
-        f'<div style="text-align:center; padding:5px 0 12px;">'
-        f'<div style="font-size:.76rem; letter-spacing:.12em; text-transform:uppercase; '
-        f'font-weight:700; color:#3d9dff;">{selected_difficulty} mode</div>'
-        f'<div style="font-size:2.15rem; font-weight:750; letter-spacing:-.04em; '
-        f'color:#fff; margin:4px 0;">{number_min} – {number_max}</div>'
-        f'<div style="font-size:.86rem; color:rgba(235,235,245,.62);">'
-        f'Guess a whole number in this range</div></div>',
-        unsafe_allow_html=True,
-    )
 
-    info_col1, info_col2 = st.columns(2)
-    with info_col1:
-        st.metric("Attempts allowed", int(selected_attempts))
-    with info_col2:
-        st.metric(
-            "Attempts remaining",
-            st.session_state.number_game_attempts_left
-            if st.session_state.number_game_active
-            else int(selected_attempts),
+setup_col, play_col = st.columns([1, 1.45], gap="medium")
+
+# ---------------- left: setup ----------------
+with setup_col:
+    with st.container(border=True):
+        st.subheader("Game setup")
+
+        selected_difficulty = st.selectbox(
+            "Difficulty",
+            list(NUMBER_GAME_DIFFICULTIES.keys()),
+            key="number_game_difficulty",
         )
 
-    start_game = st.button(
-        "🎮 Start / New Game",
-        use_container_width=True,
-        type="primary",
-        key="number_game_start",
-    )
-
-    if start_game:
-        st.session_state.number_game_target = random.randint(number_min, number_max)
-        st.session_state.number_game_active = True
-        st.session_state.number_game_over = False
-        st.session_state.number_game_won = False
-        st.session_state.number_game_attempts_left = int(selected_attempts)
-        st.session_state.number_game_attempts_used = 0
-        st.session_state.number_game_last_hint = ""
-        st.rerun()
-
-    if st.session_state.number_game_active and not st.session_state.number_game_over:
-        st.markdown("---")
-        guess = st.number_input(
-            f"Your guess ({number_min}–{number_max})",
-            min_value=number_min,
-            max_value=number_max,
-            value=number_min,
+        selected_attempts = st.number_input(
+            "Attempts allowed",
+            min_value=1,
+            max_value=30,
+            value=5,
             step=1,
-            key=f"number_game_guess_{selected_difficulty}",
+            key="number_game_attempt_limit",
+            help="Choose how many guesses you get before the game ends.",
         )
 
-        submit_guess = st.button(
-            "Submit Guess",
+        number_min, number_max = NUMBER_GAME_DIFFICULTIES[selected_difficulty]
+        current_game_config = (selected_difficulty, int(selected_attempts))
+
+        # Changing either setting prepares a fresh game, so attempts and old
+        # hints from a previous difficulty cannot carry over.
+        if st.session_state.number_game_config != current_game_config:
+            st.session_state.number_game_config = current_game_config
+            reset_number_game(selected_attempts)
+
+        st.caption(f"Guess a whole number from {number_min} to {number_max}.")
+
+        if st.session_state.number_game_over:
+            start_label = "Play again"
+        elif st.session_state.number_game_active:
+            start_label = "Restart"
+        else:
+            start_label = "Start game"
+
+        if st.button(
+            start_label,
             use_container_width=True,
-            key="number_game_submit",
-        )
-
-        if submit_guess:
-            st.session_state.number_game_attempts_used += 1
-            st.session_state.number_game_attempts_left -= 1
-
-            if int(guess) == st.session_state.number_game_target:
-                st.session_state.number_game_won = True
-                st.session_state.number_game_over = True
-                st.session_state.number_game_active = False
-                st.session_state.number_game_last_hint = (
-                    f"🎉 Correct! You found {st.session_state.number_game_target} "
-                    f"in {st.session_state.number_game_attempts_used} "
-                    f"attempt(s)."
-                )
-            elif st.session_state.number_game_attempts_left <= 0:
-                st.session_state.number_game_over = True
-                st.session_state.number_game_active = False
-                st.session_state.number_game_last_hint = (
-                    f"Out of attempts! The secret number was "
-                    f"{st.session_state.number_game_target}."
-                )
-            elif int(guess) < st.session_state.number_game_target:
-                st.session_state.number_game_last_hint = (
-                    "Too low — try a higher number."
-                )
-            else:
-                st.session_state.number_game_last_hint = (
-                    "Too high — try a lower number."
-                )
-
+            type="primary",
+            key="number_game_start",
+        ):
+            reset_number_game(selected_attempts)
+            st.session_state.number_game_target = random.randint(number_min, number_max)
+            st.session_state.number_game_active = True
             st.rerun()
 
-    if st.session_state.number_game_last_hint:
-        if st.session_state.number_game_won:
-            st.success(st.session_state.number_game_last_hint)
+# ---------------- right: play area ----------------
+with play_col:
+    with st.container(border=True):
+        total_attempts = int(selected_attempts)
+        remaining = st.session_state.number_game_attempts_left
+
+        pips = "".join(
+            f'<i class="{"left" if n < remaining else ""}"></i>'
+            for n in range(total_attempts)
+        )
+
+        st.markdown(
+            f'<div class="gtn-hud">'
+            f'<div class="gtn-eyebrow">{selected_difficulty} mode</div>'
+            f'<div class="gtn-range">{number_min}<span>to</span>{number_max}</div>'
+            f'<div class="gtn-sub">Find the secret number</div>'
+            f'</div>'
+            f'<div class="gtn-meter"><span>Attempts</span>'
+            f'<b>{remaining} of {total_attempts} left</b></div>'
+            f'<div class="gtn-pips">{pips}</div>',
+            unsafe_allow_html=True,
+        )
+
+        hint_kind = st.session_state.number_game_hint_kind
+        target = st.session_state.number_game_target
+        used = st.session_state.number_game_attempts_used
+
+        if hint_kind:
+            hint_icon = {"up": "↑", "down": "↓", "win": "✓", "lose": "✕"}[hint_kind]
+            if hint_kind == "up":
+                hint_title, hint_text = "Too low", "Aim higher."
+            elif hint_kind == "down":
+                hint_title, hint_text = "Too high", "Aim lower."
+            elif hint_kind == "win":
+                hint_title = "Correct"
+                hint_text = f"You found {target} in {used} attempt{'s' if used != 1 else ''}."
+            else:
+                hint_title = "Out of attempts"
+                hint_text = f"The secret number was {target}."
+
+            st.markdown(
+                f'<div class="gtn-hint {hint_kind}"><div class="ic">{hint_icon}</div>'
+                f'<div><strong>{hint_title}</strong>'
+                f'<span class="t">{hint_text}</span></div></div>',
+                unsafe_allow_html=True,
+            )
+
+        if st.session_state.number_game_history:
+            chips = "".join(
+                f'<span class="gtn-chip{" hit" if hit else ""}">{g}<em>{arrow}</em></span>'
+                for g, arrow, hit in st.session_state.number_game_history
+            )
+            st.markdown(f'<div class="gtn-history">{chips}</div>', unsafe_allow_html=True)
+
+        if st.session_state.number_game_won and not st.session_state.number_game_celebrated:
+            st.session_state.number_game_celebrated = True
             st.balloons()
-        elif st.session_state.number_game_over:
-            st.error(st.session_state.number_game_last_hint)
-        elif st.session_state.number_game_active:
-            st.info(st.session_state.number_game_last_hint)
 
-    if not st.session_state.number_game_active and not st.session_state.number_game_over:
-        st.caption("Press **Start / New Game** to generate your secret number.")
-    elif st.session_state.number_game_over:
-        st.caption("Want another round? Press **Start / New Game**.")
+        if st.session_state.number_game_active and not st.session_state.number_game_over:
+            guess = st.number_input(
+                f"Your guess ({number_min}–{number_max})",
+                min_value=number_min,
+                max_value=number_max,
+                value=number_min,
+                step=1,
+                key=f"number_game_guess_{selected_difficulty}",
+            )
 
+            if st.button("Submit guess", use_container_width=True, key="number_game_submit"):
+                guess = int(guess)
+                st.session_state.number_game_attempts_used += 1
+                st.session_state.number_game_attempts_left -= 1
+
+                if guess == st.session_state.number_game_target:
+                    arrow, hit = "✓", True
+                    st.session_state.number_game_won = True
+                    st.session_state.number_game_over = True
+                    st.session_state.number_game_active = False
+                    st.session_state.number_game_hint_kind = "win"
+                else:
+                    arrow, hit = ("↑", False) if guess < st.session_state.number_game_target else ("↓", False)
+                    if st.session_state.number_game_attempts_left <= 0:
+                        st.session_state.number_game_over = True
+                        st.session_state.number_game_active = False
+                        st.session_state.number_game_hint_kind = "lose"
+                    else:
+                        st.session_state.number_game_hint_kind = "up" if arrow == "↑" else "down"
+
+                st.session_state.number_game_history.append((guess, arrow, hit))
+                st.rerun()
+
+        elif not st.session_state.number_game_over:
+            st.markdown(
+                '<div class="gtn-idle">Press <b>Start game</b> to generate your secret number.</div>',
+                unsafe_allow_html=True,
+            )
