@@ -1713,7 +1713,7 @@ profile_nav_item = (
     if st.session_state.profile_complete
     else '<a class="navigation-link" href="#profile" data-smooth="profile">Profile</a>'
 )
-nav_column_count = 5 if st.session_state.profile_complete else 6
+nav_column_count = 7 if st.session_state.profile_complete else 8   # was 5 ... 6
 
 nav_items = "".join(
     item
@@ -1724,6 +1724,9 @@ nav_items = "".join(
         nav_link("grading", "Grades"),
         nav_link("quiz-maker", "Quiz"),
         nav_link("number-game", "Guess Game"),
+        nav_link("todo", "To-Do"),        # add
+        nav_link("money", "Money"),       # add
+    )
     )
     if item
 )
