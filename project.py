@@ -2930,3 +2930,373 @@ with play_col:
                 '<div class="gtn-idle">Press <b>Start game</b> to generate your secret number.</div>',
                 unsafe_allow_html=True,
             )
+
+
+# ==========================================================
+# PASTE THIS BLOCK AT THE VERY END OF YOUR FILE
+# (after the Guess the Number section)
+# ==========================================================
+
+import csv  # noqa: F401  (kept for easy CSV tweaks)
+import json
+from datetime import date, datetime
+
+import pandas as pd
+
+st.markdown(
+    """
+<style>
+/* ---------- tabs, progress, download buttons (match the theme) ---------- */
+.stTabs [data-baseweb="tab-list"] { gap: 6px; border-bottom: 1px solid var(--hairline); }
+.stTabs [data-baseweb="tab"] { background: transparent; color: var(--muted); }
+.stTabs [aria-selected="true"] { color: #ffffff; }
+.stTabs [data-baseweb="tab-highlight"] { background: var(--blue) !important; }
+
+.stProgress [data-baseweb="progress-bar"] > div { background: rgba(255,255,255,0.12) !important; border-radius: 99px; }
+.stProgress [data-baseweb="progress-bar"] > div > div {
+    background: linear-gradient(90deg, var(--blue-hi), var(--blue)) !important;
+    border-radius: 99px;
+}
+
+.stDownloadButton > button {
+    background: rgba(255,255,255,0.09) !important;
+    color: #ffffff !important;
+    border: 1px solid var(--hairline) !important;
+    border-radius: var(--r-pill) !important;
+    min-height: 46px;
+    width: 100%;
+    font-weight: 500 !important;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    transition: background 0.18s ease, transform 0.36s var(--spring);
+}
+.stDownloadButton > button:hover { background: rgba(255,255,255,0.16) !important; }
+.stDownloadButton > button:active { transform: scale(0.95); }
+
+/* ---------- home: 6 portals = 3 x 2 on desktop ---------- */
+@media (min-width: 769px) {
+    .portals { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+}
+
+.art-todo { width: 100%; height: 236px; margin-bottom: 26px; flex-direction: column; justify-content: flex-end; gap: 10px; }
+.art-todo .t {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px; border-radius: 14px; font-size: 0.88rem;
+    background: rgba(255,255,255,0.11);
+}
+.art-todo .t b {
+    width: 20px; height: 20px; flex-shrink: 0; border-radius: 50%;
+    border: 2px solid var(--fg-soft); display: grid; place-items: center; font-size: 0.7rem;
+}
+.art-todo .t.done b { background: #30d158; border-color: #30d158; color: #fff; }
+.art-todo .t.done span { text-decoration: line-through; opacity: 0.6; }
+.art-todo .bar { height: 8px; border-radius: 99px; background: rgba(255,255,255,0.14); overflow: hidden; margin-top: 4px; }
+.art-todo .bar i { display: block; height: 100%; width: 66%; background: linear-gradient(90deg, #3d9dff, #0a84ff); }
+
+.art-money { width: 100%; height: 236px; margin-bottom: 26px; flex-direction: column; justify-content: flex-end; gap: 8px; }
+.art-money .lbl { font-size: 0.82rem; color: var(--fg-soft); }
+.art-money .amt { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.04em; line-height: 1; margin-bottom: 8px; }
+.art-money .row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 11px 14px; border-radius: 14px; font-size: 0.86rem;
+    background: rgba(0,0,0,0.06);
+}
+.art-money .row b.in { color: #1f9d4a; }
+.art-money .row b.out { color: #d93a30; }
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
+
+def rp(amount):
+    """10000 -> 'Rp 10 000'"""
+    return f"Rp {int(amount):,}".replace(",", " ")
+
+
+def rp_signed(kind, amount):
+    """Allowance -> 'Rp. + 10 000', Expense -> 'Rp. - 10 000'"""
+    sign = "+" if kind == "Allowance" else "-"
+    return f"Rp. {sign} {int(amount):,}".replace(",", " ")
+
+
+# ==========================================================
+# TO DO LIST
+# ==========================================================
+
+st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
+st.markdown("---")
+st.markdown('<div id="todo" class="section-anchor"></div>', unsafe_allow_html=True)
+
+st.title("To do List")
+st.markdown(
+    '<p class="lede">Add a task, confirm it, then tick it off when it is done.</p>',
+    unsafe_allow_html=True,
+)
+
+if "todo_items" not in st.session_state:
+    st.session_state.todo_items = []
+if "todo_empty_warning" not in st.session_state:
+    st.session_state.todo_empty_warning = False
+
+
+def add_todo_task():
+    text = st.session_state.todo_input.strip()
+    if not text:
+        st.session_state.todo_empty_warning = True
+        return
+    st.session_state.todo_items.append({"id": uuid4().hex[:8], "text": text, "done": False})
+    st.session_state.todo_input = ""
+    st.session_state.todo_empty_warning = False
+
+
+def toggle_todo_task(task_id):
+    for task in st.session_state.todo_items:
+        if task["id"] == task_id:
+            task["done"] = st.session_state[f"todo_done_{task_id}"]
+
+
+def clear_done_todos():
+    st.session_state.todo_items = [t for t in st.session_state.todo_items if not t["done"]]
+
+
+with st.container(border=True):
+    st.subheader("Add a task")
+    st.text_input(
+        "Task",
+        placeholder="What do you need to do?",
+        key="todo_input",
+        label_visibility="collapsed",
+    )
+    st.button(
+        "Confirm task",
+        key="todo_confirm",
+        use_container_width=True,
+        type="primary",
+        on_click=add_todo_task,
+    )
+    if st.session_state.todo_empty_warning:
+        st.warning("Type a task first.")
+
+todo_total = len(st.session_state.todo_items)
+todo_done = sum(1 for t in st.session_state.todo_items if t["done"])
+
+with st.container(border=True):
+    st.subheader("Your progress")
+    if todo_total == 0:
+        st.progress(0.0, text="No tasks yet")
+    else:
+        st.progress(
+            todo_done / todo_total,
+            text=f"{todo_done} of {todo_total} completed · {round(todo_done / todo_total * 100)}%",
+        )
+        if todo_done == todo_total:
+            st.success("All tasks completed. Great job.")
+
+with st.container(border=True):
+    st.subheader("Your tasks")
+    if not st.session_state.todo_items:
+        st.markdown('<p class="lede" style="margin:0">Nothing here yet. Add your first task above.</p>',
+                    unsafe_allow_html=True)
+    for task in st.session_state.todo_items:
+        st.checkbox(
+            f"~~{task['text']}~~" if task["done"] else task["text"],
+            value=task["done"],
+            key=f"todo_done_{task['id']}",
+            on_change=toggle_todo_task,
+            args=(task["id"],),
+        )
+    if todo_done:
+        st.button("Remove completed tasks", key="todo_clear_done", use_container_width=True, on_click=clear_done_todos)
+
+
+# ==========================================================
+# STUDENT MONEY MANAGER
+# ==========================================================
+
+st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
+st.markdown("---")
+st.markdown('<div id="money" class="section-anchor"></div>', unsafe_allow_html=True)
+
+st.title("Money Manager")
+st.markdown(
+    '<p class="lede">Track the allowance you receive and the money you spend.</p>',
+    unsafe_allow_html=True,
+)
+
+EXPENSE_CATEGORIES = ["Food", "Transport", "School", "Entertainment", "Shopping", "Other"]
+
+if "money_transactions" not in st.session_state:
+    st.session_state.money_transactions = []
+
+st.session_state.setdefault("money_source", "")
+st.session_state.setdefault("money_in_amount", 10000)
+st.session_state.setdefault("money_in_date", date.today())
+st.session_state.setdefault("money_what", "")
+st.session_state.setdefault("money_category", EXPENSE_CATEGORIES[0])
+st.session_state.setdefault("money_out_amount", 10000)
+st.session_state.setdefault("money_out_date", date.today())
+
+
+def money_totals():
+    txns = st.session_state.money_transactions
+    income = sum(t["amount"] for t in txns if t["type"] == "Allowance")
+    spent = sum(t["amount"] for t in txns if t["type"] == "Expense")
+    return income, spent, income - spent
+
+
+def add_allowance():
+    s = st.session_state
+    source = s.money_source.strip()
+    amount = int(s.money_in_amount)
+    if not source:
+        s.money_msg = ("warning", "Tell me where the money came from.")
+        return
+    if amount <= 0:
+        s.money_msg = ("warning", "The amount must be more than 0.")
+        return
+    s.money_transactions.append(
+        {"date": s.money_in_date.isoformat(), "type": "Allowance",
+         "description": source, "category": "Income", "amount": amount}
+    )
+    s.money_source, s.money_in_amount, s.money_in_date = "", 10000, date.today()
+    s.money_msg = ("success", f"Saved {rp(amount)} from {source}.")
+
+
+def add_expense():
+    s = st.session_state
+    what = s.money_what.strip()
+    amount = int(s.money_out_amount)
+    _, _, balance = money_totals()
+    if not what:
+        s.money_msg = ("warning", "Tell me what you spent money on.")
+        return
+    if amount <= 0:
+        s.money_msg = ("warning", "The amount must be more than 0.")
+        return
+    if amount > balance:
+        s.money_msg = ("warning", f"You only have {rp(balance)} left. Add allowance first.")
+        return
+    s.money_transactions.append(
+        {"date": s.money_out_date.isoformat(), "type": "Expense",
+         "description": what, "category": s.money_category, "amount": amount}
+    )
+    s.money_what, s.money_out_amount, s.money_out_date = "", 10000, date.today()
+    s.money_msg = ("success", f"Saved expense of {rp(amount)} for {what}.")
+
+
+money_income, money_spent, money_balance = money_totals()
+
+# ---------- dashboard ----------
+st.subheader("Money Dashboard")
+m1, m2, m3 = st.columns(3)
+with m1:
+    with st.container(border=True):
+        st.metric("Total Allowance", rp(money_income))
+with m2:
+    with st.container(border=True):
+        st.metric("Total Expenses", rp(money_spent))
+with m3:
+    with st.container(border=True):
+        st.metric("Remaining Balance", rp(money_balance))
+
+if money_balance < 0:
+    st.error("You have spent more than you received.")
+elif money_income > 0 and money_balance < money_income * 0.2:
+    st.warning("Your balance is running low. Spend carefully.")
+else:
+    st.success("You're doing well! Keep managing your money wisely.")
+
+# ---------- record a transaction ----------
+st.subheader("Record a Transaction")
+
+with st.container(border=True):
+    tab_in, tab_out = st.tabs(["Add Allowance", "Add Expense"])
+
+    with tab_in:
+        st.text_input("Where did the money come from?", placeholder="Example: Mom, birthday gift, savings",
+                      key="money_source")
+        a1, a2 = st.columns(2)
+        with a1:
+            st.number_input("Amount received (Rp)", min_value=0, step=1000, key="money_in_amount")
+        with a2:
+            st.date_input("Date received", key="money_in_date")
+        st.button("Save Allowance", key="money_save_in", use_container_width=True,
+                  type="primary", on_click=add_allowance)
+
+    with tab_out:
+        st.text_input("What did you spend money on?", placeholder="Example: Lunch, bus fare, notebook",
+                      key="money_what")
+        b1, b2 = st.columns(2)
+        with b1:
+            st.selectbox("Category", EXPENSE_CATEGORIES, key="money_category")
+        with b2:
+            st.number_input("Amount spent (Rp)", min_value=0, step=1000, key="money_out_amount")
+        st.date_input("Date spent", key="money_out_date")
+        st.button("Save Expense", key="money_save_out", use_container_width=True,
+                  type="primary", on_click=add_expense)
+
+money_msg = st.session_state.pop("money_msg", None)
+if money_msg:
+    getattr(st, money_msg[0])(money_msg[1])
+
+# ---------- transaction history ----------
+st.subheader("Transaction History")
+
+money_rows = sorted(st.session_state.money_transactions, key=lambda t: t["date"], reverse=True)
+
+if not money_rows:
+    st.markdown('<p class="lede">No transactions yet. Save an allowance or an expense above.</p>',
+                unsafe_allow_html=True)
+else:
+    st.table(
+        pd.DataFrame(
+            {
+                "Date": [t["date"] for t in money_rows],
+                "Type": [t["type"] for t in money_rows],
+                "Description": [t["description"] for t in money_rows],
+                "Category": [t["category"] for t in money_rows],
+                "Amount": [rp_signed(t["type"], t["amount"]) for t in money_rows],
+            }
+        ).set_index("Date")
+    )
+
+# ---------- download ----------
+st.subheader("Download your data")
+
+export_rows = [
+    {
+        "Date": t["date"],
+        "Type": t["type"],
+        "Description": t["description"],
+        "Category": t["category"],
+        "Amount (Rp)": t["amount"] if t["type"] == "Allowance" else -t["amount"],
+    }
+    for t in money_rows
+]
+money_csv = pd.DataFrame(
+    export_rows, columns=["Date", "Type", "Description", "Category", "Amount (Rp)"]
+).to_csv(index=False)
+
+money_json = json.dumps(
+    {
+        "exported_at": datetime.now().isoformat(timespec="seconds"),
+        "summary": {
+            "total_allowance": money_income,
+            "total_expenses": money_spent,
+            "remaining_balance": money_balance,
+        },
+        "transactions": export_rows,
+        "todos": [{"task": t["text"], "completed": t["done"]} for t in st.session_state.todo_items],
+    },
+    indent=2,
+    ensure_ascii=False,
+)
+
+d1, d2 = st.columns(2)
+with d1:
+    st.download_button("Download transactions (CSV)", data=money_csv, file_name="transactions.csv",
+                       mime="text/csv", disabled=not money_rows)
+with d2:
+    st.download_button("Download all data (JSON)", data=money_json, file_name="all_data.json",
+                       mime="application/json")
